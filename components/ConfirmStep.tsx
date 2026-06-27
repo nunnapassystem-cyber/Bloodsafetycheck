@@ -3,14 +3,10 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { ConfirmationSummary } from '@/components/ConfirmationSummary'
 import { AlertBanner } from '@/components/AlertBanner'
+import { fmtTime } from '@/lib/format'
 import type { usePatientSession } from '@/hooks/usePatientSession'
 
 interface Props { session: ReturnType<typeof usePatientSession> }
-
-function fmtTime(iso: string): string {
-  const d = new Date(iso)
-  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`
-}
 
 export function ConfirmStep({ session }: Props) {
   const [nurse1Name, setNurse1Name] = useState('')

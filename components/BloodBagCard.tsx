@@ -1,12 +1,8 @@
 import type { BloodBagData } from '@/types'
 import { isExpired, isExpiringSoon } from '@/lib/blood-logic'
+import { fmtDate } from '@/lib/format'
 
 interface Props { bag: BloodBagData }
-
-function fmtDate(iso: string): string {
-  const d = new Date(iso)
-  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`
-}
 
 export function BloodBagCard({ bag }: Props) {
   const expired = isExpired(bag.expiryISO)

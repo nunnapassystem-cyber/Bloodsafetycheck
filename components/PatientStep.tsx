@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { BarcodeScanner } from '@/components/BarcodeScanner'
 import { PatientCard } from '@/components/PatientCard'
 import { AlertBanner } from '@/components/AlertBanner'
@@ -15,6 +15,14 @@ interface Props { session: ReturnType<typeof usePatientSession> }
 export function PatientStep({ session }: Props) {
   const [scanError, setScanError] = useState<string | null>(null)
   const [matchFailed, setMatchFailed] = useState(false)
+  const [nurse1Name, setNurse1Name] = useState('')
+  useEffect(() => {
+    import('@/lib/supabase/client').then(({ createClient }) => {
+      createClient().auth.getUser().then(({ data: { user } }) => {
+        if (user?.user_metadata?.nurse_name) setNurse1Name(user.user_metadata.nurse_name)
+      })
+    })
+  }, [])
 
   function handleWristbandScan(raw: string) {
     setScanError(null)
@@ -42,7 +50,7 @@ export function PatientStep({ session }: Props) {
           blood_group_bag: session.bloodBag.bloodGroup,
           match_result: 'FAIL',
           alert_reason: `Blood Group ไม่ตรง: ผู้ป่วย ${session.patientBloodGroup} / ถุงเลือด ${session.bloodBag.bloodGroup}`,
-          nurse_1_name: '',
+          nurse_1_name: nurse1Name,
           nurse_2_name: '',
           started_at: new Date().toISOString(),
         }),
