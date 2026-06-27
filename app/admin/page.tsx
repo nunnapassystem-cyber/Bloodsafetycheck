@@ -30,10 +30,9 @@ export default function AdminPage() {
 
   useRealtimeLogs((log) => { setFailAlert(log); fetchLogs() })
 
-  const todayLogs = logs.filter(l => l.started_at.startsWith(todayISO()))
-  const passCount = todayLogs.filter(l => l.match_result === 'PASS').length
-  const failCount = todayLogs.filter(l => l.match_result === 'FAIL').length
-  const wardCount = new Set(todayLogs.map(l => l.ward_id)).size
+  const passCount = logs.filter(l => l.match_result === 'PASS').length
+  const failCount = logs.filter(l => l.match_result === 'FAIL').length
+  const wardCount = new Set(logs.map(l => l.ward_id)).size
 
   const wardIds = Array.from(new Set(logs.map(l => l.ward_id)))
   const wardChartData = wardIds.map(w => ({
@@ -55,7 +54,7 @@ export default function AdminPage() {
       )}
 
       <div className="grid grid-cols-2 gap-3">
-        <KPICard label="รายการวันนี้ (ทั้งหมด)" value={todayLogs.length} />
+        <KPICard label="รายการ (ทั้งหมด)" value={logs.length} />
         <KPICard label="PASS" value={passCount} />
         <KPICard label="FAIL / Alert" value={failCount} danger={failCount > 0} />
         <KPICard label="Ward ที่ใช้งาน" value={wardCount} />
@@ -69,6 +68,7 @@ export default function AdminPage() {
             <YAxis tick={{ fontSize: 11 }} />
             <Tooltip />
             <Legend />
+            {/* Recharts fill requires hex/CSS values — Tailwind class strings not supported here */}
             <Bar dataKey="PASS" fill="#1A7A4A" />
             <Bar dataKey="FAIL" fill="#A32D2D" />
           </BarChart>
