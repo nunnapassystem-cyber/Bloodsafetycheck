@@ -27,6 +27,7 @@ export function ConfirmStep({ session }: Props) {
   }, [])
 
   async function handleConfirm() {
+    if (!nurse1Name.trim()) { setError('ไม่สามารถโหลดข้อมูลพยาบาล — กรุณา Logout และ Login ใหม่'); return }
     if (!nurse2Name.trim()) { setError('กรุณากรอกชื่อพยาบาลคนที่ 2'); return }
     if (nurse2Name.trim() === nurse1Name.trim()) { setError('ต้องเป็นพยาบาลคนละคน'); return }
     if (!session.bloodBag || !session.patientData) return
