@@ -21,7 +21,7 @@ export default function LoginPage() {
     const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
     setLoading(false)
     if (authError) {
-      setError(`${authError.message} [${authError.status}]`)
+      setError('อีเมลหรือรหัสผ่านไม่ถูกต้อง')
       return
     }
     router.push('/scan')
