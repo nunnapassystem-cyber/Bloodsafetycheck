@@ -19,6 +19,7 @@ export default function AuditPage() {
     setError(null)
     try {
       const res = await fetch(`/api/logs?date=${date}&result=${result}`)
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data = await res.json()
       setLogs(Array.isArray(data) ? data : [])
     } catch {
