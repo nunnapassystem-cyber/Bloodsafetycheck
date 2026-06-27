@@ -1,11 +1,7 @@
 import type { TransfusionLog } from '@/types'
+import { fmtTime } from '@/lib/format'
 
 interface Props { logs: TransfusionLog[]; showWard?: boolean }
-
-function fmtTime(iso: string): string {
-  const d = new Date(iso)
-  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`
-}
 
 export function AuditTable({ logs, showWard = false }: Props) {
   if (logs.length === 0) return <p className="text-sm text-gray-400 text-center py-8">ไม่มีรายการ</p>

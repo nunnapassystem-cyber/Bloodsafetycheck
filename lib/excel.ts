@@ -1,10 +1,6 @@
 import * as XLSX from 'xlsx'
 import type { TransfusionLog } from '@/types'
-
-function fmtTime(iso: string): string {
-  const d = new Date(iso)
-  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`
-}
+import { fmtTime } from '@/lib/format'
 
 export function exportLogsToExcel(logs: TransfusionLog[]): void {
   const rows = logs.map(l => ({

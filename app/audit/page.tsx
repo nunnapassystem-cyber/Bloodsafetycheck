@@ -12,13 +12,20 @@ export default function AuditPage() {
   const [result, setResult] = useState<'all' | 'PASS' | 'FAIL'>('all')
   const [logs, setLogs] = useState<TransfusionLog[]>([])
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const fetchLogs = useCallback(async () => {
     setLoading(true)
-    const res = await fetch(`/api/logs?date=${date}&result=${result}`)
-    const data = await res.json()
-    setLogs(Array.isArray(data) ? data : [])
-    setLoading(false)
+    setError(null)
+    try {
+      const res = await fetch(`/api/logs?date=${date}&result=${result}`)
+      const data = await res.json()
+      setLogs(Array.isArray(data) ? data : [])
+    } catch {
+      setError('โหลดข้อมูลไม่สำเร็จ — กรุณารีเฟรช')
+    } finally {
+      setLoading(false)
+    }
   }, [date, result])
 
   useEffect(() => { fetchLogs() }, [fetchLogs])
@@ -38,7 +45,9 @@ export default function AuditPage() {
       <FilterBar date={date} onDateChange={setDate} result={result} onResultChange={setResult} count={logs.length} />
       {loading
         ? <p className="text-sm text-gray-400 text-center py-8">กำลังโหลด...</p>
-        : <AuditTable logs={logs} />}
+        : error
+          ? <p className="text-sm text-danger text-center py-8">{error}</p>
+          : <AuditTable logs={logs} />}
     </div>
   )
 }
