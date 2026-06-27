@@ -1,0 +1,44 @@
+'use client'
+import { useState, useEffect, useCallback } from 'react'
+import { FilterBar } from '@/components/FilterBar'
+import { AuditTable } from '@/components/AuditTable'
+import { exportLogsToExcel } from '@/lib/excel'
+import type { TransfusionLog } from '@/types'
+
+function todayISO(): string { return new Date().toISOString().slice(0, 10) }
+
+export default function AuditPage() {
+  const [date, setDate] = useState(todayISO())
+  const [result, setResult] = useState<'all' | 'PASS' | 'FAIL'>('all')
+  const [logs, setLogs] = useState<TransfusionLog[]>([])
+  const [loading, setLoading] = useState(false)
+
+  const fetchLogs = useCallback(async () => {
+    setLoading(true)
+    const res = await fetch(`/api/logs?date=${date}&result=${result}`)
+    const data = await res.json()
+    setLogs(Array.isArray(data) ? data : [])
+    setLoading(false)
+  }, [date, result])
+
+  useEffect(() => { fetchLogs() }, [fetchLogs])
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-base font-semibold text-gray-900">Audit Log</h1>
+        <button
+          onClick={() => exportLogsToExcel(logs)}
+          disabled={logs.length === 0}
+          className="text-xs font-medium text-primary border border-primary rounded px-3 py-1.5 hover:bg-primary-light disabled:opacity-50 transition-colors"
+        >
+          Export Excel
+        </button>
+      </div>
+      <FilterBar date={date} onDateChange={setDate} result={result} onResultChange={setResult} count={logs.length} />
+      {loading
+        ? <p className="text-sm text-gray-400 text-center py-8">กำลังโหลด...</p>
+        : <AuditTable logs={logs} />}
+    </div>
+  )
+}
