@@ -2,8 +2,10 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { WARDS } from '@/lib/wards'
 
 export default function LoginPage() {
+  const [wardId, setWardId] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -12,18 +14,30 @@ export default function LoginPage() {
   const supabase = createClient()
 
   async function handleLogin() {
+    if (!wardId) {
+      setError('กรุณาเลือก Ward ก่อนเข้าระบบ')
+      return
+    }
     if (!email || !password) {
       setError('กรุณากรอกอีเมลและรหัสผ่าน')
       return
     }
     setLoading(true)
     setError(null)
+
     const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
-    setLoading(false)
     if (authError) {
+      setLoading(false)
       setError('อีเมลหรือรหัสผ่านไม่ถูกต้อง')
       return
     }
+
+    const ward = WARDS.find(w => w.id === wardId)!
+    await supabase.auth.updateUser({
+      data: { ward_id: ward.id, ward_name: ward.name },
+    })
+
+    setLoading(false)
     router.push('/scan')
     router.refresh()
   }
@@ -43,6 +57,19 @@ export default function LoginPage() {
         )}
 
         <div className="space-y-4">
+          <div>
+            <label className="text-xs font-medium text-gray-500 block mb-1">Ward</label>
+            <select
+              value={wardId}
+              onChange={e => { setWardId(e.target.value); setError(null) }}
+              className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary"
+            >
+              <option value="">เลือก Ward...</option>
+              {WARDS.map(w => (
+                <option key={w.id} value={w.id}>{w.name}</option>
+              ))}
+            </select>
+          </div>
           <div>
             <label className="text-xs font-medium text-gray-500 block mb-1">Email</label>
             <input
