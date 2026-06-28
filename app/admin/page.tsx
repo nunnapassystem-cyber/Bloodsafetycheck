@@ -226,7 +226,7 @@ export default function AdminPage() {
               <div className="space-y-2">
                 <p className="text-xs font-medium text-gray-500">สถานะ Ward (มี User / ไม่มี User)</p>
                 <div className="grid grid-cols-2 gap-2">
-                  {WARDS.filter(w => w.id !== 'admin').map(w => {
+                  {WARDS.map(w => {
                     const count = nurses.filter(n => n.ward_id === w.id).length
                     const hasUser = count > 0
                     return (
