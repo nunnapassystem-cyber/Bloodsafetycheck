@@ -7,7 +7,7 @@ export function ConfirmationSummary({ bloodBag, patientData, patientBloodGroup }
   return (
     <div className="border border-gray-200 rounded-lg p-4 space-y-3">
       <p className="text-xs font-medium text-gray-500">สรุปก่อนยืนยัน</p>
-      <Row label="ชื่อผู้ป่วย" value={patientData.name} />
+      <Row label="ชื่อผู้ป่วย / HN" value={patientData.name || `HN: ${patientData.wristbandId}`} />
       <Row label="Blood Group ผู้ป่วย" value={patientBloodGroup} mono />
       <Row label="Blood Group ถุงเลือด" value={bloodBag.bloodGroup} mono />
       <Row label="ชนิดเลือด" value={bloodBag.component} />

@@ -21,9 +21,13 @@ export function parseBarcodeBloodBag(raw: string): BloodBagData | null {
 
 export function parseBarcodeWristband(raw: string): PatientData | null {
   if (!raw) return null
-  const parts = raw.split('|')
-  if (parts.length !== 2) return null
-  const [wristbandId, name] = parts
-  if (!wristbandId || !name) return null
-  return { wristbandId, name }
+  if (raw.includes('|')) {
+    const parts = raw.split('|')
+    if (parts.length !== 2) return null
+    const [wristbandId, name] = parts
+    if (!wristbandId || !name) return null
+    return { wristbandId, name }
+  }
+  // ป้ายข้อมือโรงพยาบาล: barcode เก็บแค่ HN
+  return { wristbandId: raw.trim(), name: '' }
 }
