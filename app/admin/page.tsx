@@ -43,6 +43,41 @@ export default function AdminPage() {
   const [resetMsg, setResetMsg] = useState<{ id: string; ok: boolean; text: string } | null>(null)
   const [resetting, setResetting] = useState(false)
 
+  const [editUserId, setEditUserId] = useState<string | null>(null)
+  const [editName, setEditName] = useState('')
+  const [editWardId, setEditWardId] = useState('')
+  const [editMsg, setEditMsg] = useState<{ id: string; ok: boolean; text: string } | null>(null)
+  const [editing, setEditing] = useState(false)
+
+  function openEdit(n: NurseUser) {
+    setEditUserId(n.id)
+    setEditName(n.nurse_name)
+    setEditWardId(n.ward_id)
+    setEditMsg(null)
+    setResetUserId(null)
+  }
+
+  async function handleEdit(userId: string) {
+    if (!editName.trim() || !editWardId) { setEditMsg({ id: userId, ok: false, text: 'กรุณากรอกข้อมูลให้ครบ' }); return }
+    const ward = WARDS.find(w => w.id === editWardId)!
+    setEditing(true)
+    setEditMsg(null)
+    const res = await fetch('/api/admin/users', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, nurse_name: editName.trim(), ward_id: ward.id, ward_name: ward.name }),
+    })
+    setEditing(false)
+    if (!res.ok) {
+      const d = await res.json()
+      setEditMsg({ id: userId, ok: false, text: d.error ?? 'แก้ไขไม่สำเร็จ' })
+    } else {
+      setEditMsg({ id: userId, ok: true, text: '✅ แก้ไขข้อมูลสำเร็จ' })
+      setEditUserId(null)
+      fetchNurses()
+    }
+  }
+
   async function handleResetPassword(userId: string) {
     if (!resetPassword) return
     setResetting(true)
@@ -256,6 +291,7 @@ export default function AdminPage() {
                             <th className="text-left text-xs font-medium text-gray-500 pb-2 pr-4">ชื่อพยาบาล</th>
                             <th className="text-left text-xs font-medium text-gray-500 pb-2 pr-4">Ward</th>
                             <th className="text-left text-xs font-medium text-gray-500 pb-2 pr-4">Email</th>
+                            <th className="text-left text-xs font-medium text-gray-500 pb-2 pr-2">แก้ไข</th>
                             <th className="text-left text-xs font-medium text-gray-500 pb-2">Reset รหัสผ่าน</th>
                           </tr>
                         </thead>
@@ -266,6 +302,15 @@ export default function AdminPage() {
                                 <td className="py-2 pr-4 text-gray-900">{n.nurse_name}</td>
                                 <td className="py-2 pr-4 text-gray-700">{n.ward_name || n.ward_id}</td>
                                 <td className="py-2 pr-4 text-gray-500 font-mono text-xs">{n.email}</td>
+                                <td className="py-2 pr-2">
+                                  {editUserId === n.id ? (
+                                    <button onClick={() => setEditUserId(null)} className="text-xs text-gray-400 hover:text-gray-600">ยกเลิก</button>
+                                  ) : (
+                                    <button onClick={() => openEdit(n)} className="text-xs font-medium text-primary underline">
+                                      แก้ไข
+                                    </button>
+                                  )}
+                                </td>
                                 <td className="py-2">
                                   {resetUserId === n.id ? (
                                     <button
@@ -276,24 +321,60 @@ export default function AdminPage() {
                                     </button>
                                   ) : (
                                     <button
-                                      onClick={() => { setResetUserId(n.id); setResetPassword('Nurse1234'); setResetMsg(null) }}
-                                      className="text-xs font-medium text-warning hover:text-warning underline"
+                                      onClick={() => { setResetUserId(n.id); setResetPassword('Nurse1234'); setResetMsg(null); setEditUserId(null) }}
+                                      className="text-xs font-medium text-warning underline"
                                     >
                                       Reset
                                     </button>
                                   )}
                                 </td>
                               </tr>
+                              {editUserId === n.id && (
+                                <tr key={`edit-${n.id}`} className="bg-primary-light border-b border-gray-100">
+                                  <td colSpan={5} className="px-2 py-3 space-y-2">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs text-gray-600 whitespace-nowrap w-20">ชื่อ-นามสกุล:</span>
+                                      <input
+                                        type="text"
+                                        value={editName}
+                                        onChange={e => setEditName(e.target.value)}
+                                        className="border border-gray-200 rounded px-2 py-1 text-xs flex-1 focus:outline-none focus:border-primary"
+                                      />
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs text-gray-600 whitespace-nowrap w-20">Ward:</span>
+                                      <select
+                                        value={editWardId}
+                                        onChange={e => setEditWardId(e.target.value)}
+                                        className="border border-gray-200 rounded px-2 py-1 text-xs flex-1 focus:outline-none focus:border-primary"
+                                      >
+                                        {WARDS.filter(w => w.id !== 'admin').map(w => (
+                                          <option key={w.id} value={w.id}>{w.name}</option>
+                                        ))}
+                                      </select>
+                                      <button
+                                        onClick={() => handleEdit(n.id)}
+                                        disabled={editing}
+                                        className="bg-primary text-white text-xs font-medium px-3 py-1 rounded disabled:opacity-50 whitespace-nowrap"
+                                      >
+                                        {editing ? '...' : 'บันทึก'}
+                                      </button>
+                                    </div>
+                                    {editMsg?.id === n.id && (
+                                      <p className={`text-xs font-medium ${editMsg.ok ? 'text-success' : 'text-danger'}`}>{editMsg.text}</p>
+                                    )}
+                                  </td>
+                                </tr>
+                              )}
                               {resetUserId === n.id && (
                                 <tr key={`reset-${n.id}`} className="bg-warning-light border-b border-gray-100">
-                                  <td colSpan={4} className="px-2 py-3">
+                                  <td colSpan={5} className="px-2 py-3">
                                     <div className="flex items-center gap-2">
                                       <span className="text-xs text-gray-600 whitespace-nowrap">รหัสผ่านใหม่:</span>
                                       <input
                                         type="text"
                                         value={resetPassword}
                                         onChange={e => setResetPassword(e.target.value)}
-                                        placeholder="กรอกรหัสผ่านใหม่"
                                         className="border border-gray-200 rounded px-2 py-1 text-xs flex-1 focus:outline-none focus:border-primary"
                                         onKeyDown={e => e.key === 'Enter' && handleResetPassword(n.id)}
                                       />

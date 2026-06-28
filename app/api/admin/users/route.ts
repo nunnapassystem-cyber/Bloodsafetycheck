@@ -50,10 +50,8 @@ export async function PATCH(request: Request) {
   }
 
   const body = await request.json()
-  const { userId, password } = body
-  if (!userId || !password) {
-    return NextResponse.json({ error: 'กรุณาระบุ userId และ password' }, { status: 400 })
-  }
+  const { userId, password, nurse_name, ward_id, ward_name } = body
+  if (!userId) return NextResponse.json({ error: 'กรุณาระบุ userId' }, { status: 400 })
 
   const adminClient = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -61,8 +59,24 @@ export async function PATCH(request: Request) {
     { auth: { autoRefreshToken: false, persistSession: false } }
   )
 
-  const { error } = await adminClient.auth.admin.updateUserById(userId, { password })
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+  if (password) {
+    const { error } = await adminClient.auth.admin.updateUserById(userId, { password })
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+  }
+
+  if (nurse_name || ward_id) {
+    const { data: existing } = await adminClient.auth.admin.getUserById(userId)
+    const meta = existing?.user?.user_metadata ?? {}
+    const { error } = await adminClient.auth.admin.updateUserById(userId, {
+      user_metadata: {
+        ...meta,
+        ...(nurse_name ? { nurse_name } : {}),
+        ...(ward_id ? { ward_id, ward_name: ward_name ?? ward_id } : {}),
+      },
+    })
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+  }
+
   return NextResponse.json({ ok: true })
 }
 
