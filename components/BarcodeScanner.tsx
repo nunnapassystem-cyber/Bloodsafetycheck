@@ -71,7 +71,7 @@ export function BarcodeScanner({ onScan, label }: Props) {
 
       {scanning && (
         <div className="space-y-2">
-          <div id={containerId} className="w-full rounded overflow-hidden border border-gray-200" />
+          <div id={containerId} className="w-full rounded overflow-hidden border border-gray-200 min-h-[60vw] max-h-[360px] bg-gray-900" />
           <button onClick={stopScan} className="w-full border border-gray-200 text-sm text-gray-500 py-2 rounded hover:border-gray-400 transition-colors">
             ยกเลิก
           </button>
