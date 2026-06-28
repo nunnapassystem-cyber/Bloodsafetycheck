@@ -3,8 +3,7 @@ import { renderHook, act } from '@testing-library/react'
 import { usePatientSession } from '../usePatientSession'
 
 const MOCK_BAG = {
-  id: 'BL-001', component: 'PRC' as const, bloodGroup: 'B+',
-  expiryISO: '2099-12-31T00:00:00Z', crossMatch: 'Compatible' as const,
+  id: 'BL-001', component: 'PRC' as const, bloodGroup: 'B+', volumeMl: 300,
 }
 
 describe('usePatientSession', () => {

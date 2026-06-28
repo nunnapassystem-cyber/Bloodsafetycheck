@@ -8,18 +8,18 @@ import { AlertBanner } from '@/components/AlertBanner'
 import { PatientStep } from '@/components/PatientStep'
 import { ConfirmStep } from '@/components/ConfirmStep'
 import { usePatientSession } from '@/hooks/usePatientSession'
-import { parseBarcodeBloodBag } from '@/lib/barcode'
-import { isExpired, isBloodGroupMatch, isComponentMatch } from '@/lib/blood-logic'
 import { playAlert } from '@/lib/audio'
+import { parseBarcodeWristband } from '@/lib/barcode'
 import { createClient } from '@/lib/supabase/client'
 
 export default function ScanPage() {
   const session = usePatientSession()
-  const [scanError, setScanError] = useState<string | null>(null)
-  const [matchFailed, setMatchFailed] = useState(false)
-  const [matchPassed, setMatchPassed] = useState(false)
   const [nurse1Name, setNurse1Name] = useState('')
-  const [scannedBagIds] = useState(() => new Set<string>())
+
+  // Step 2 state
+  const [wristbandVerified, setWristbandVerified] = useState(false)
+  const [step2Fail, setStep2Fail] = useState(false)
+  const [step2FailReason, setStep2FailReason] = useState('')
 
   useEffect(() => {
     createClient().auth.getUser().then(({ data: { user } }) => {
@@ -27,61 +27,73 @@ export default function ScanPage() {
     })
   }, [])
 
-  async function handleBloodBagScan(raw: string) {
-    setScanError(null)
-    setMatchFailed(false)
-    setMatchPassed(false)
-
-    const bag = parseBarcodeBloodBag(raw)
-    if (!bag) { setScanError('รูปแบบ Barcode ไม่ถูกต้อง — กรุณาลองใหม่'); return }
-    if (scannedBagIds.has(bag.id)) { setScanError('⚠️ ถุงเลือดนี้ถูกใช้แล้ว — ตรวจสอบก่อนดำเนินการต่อ'); return }
-    scannedBagIds.add(bag.id)
-    session.setBloodBag(bag)
-
-    // blocked states — แสดง alert แต่ไม่ match
-    if (isExpired(bag.expiryISO) || bag.crossMatch === 'Incompatible') return
-
-    // auto-match: blood group + component
-    const bgOk = isBloodGroupMatch(session.patientBloodGroup, bag.bloodGroup)
-    const compOk = isComponentMatch(session.orderedComponent, bag.component)
-
-    if (!bgOk || !compOk) {
+  async function handleWristbandScan(raw: string) {
+    const parsed = parseBarcodeWristband(raw)
+    const scannedHN = parsed?.wristbandId ?? raw.trim()
+    if (scannedHN !== session.patientData!.wristbandId) {
       playAlert()
-      setMatchFailed(true)
-
-      const reasons: string[] = []
-      if (!bgOk) reasons.push(`Blood Group ไม่ตรง: ผู้ป่วย ${session.patientBloodGroup} / ถุงเลือด ${bag.bloodGroup}`)
-      if (!compOk) reasons.push(`ชนิดเลือดไม่ตรง: สั่ง ${session.orderedComponent} / ได้ ${bag.component}`)
-
+      const reason = `HN ไม่ตรง: ชาร์ท ${session.patientData!.wristbandId} / ข้อมือ ${scannedHN}`
+      setStep2Fail(true)
+      setStep2FailReason(reason)
       await fetch('/api/logs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          wristband_id: session.patientData!.wristbandId,
-          blood_bag_id: bag.id,
-          blood_component: bag.component,
-          blood_group_bag: bag.bloodGroup,
+          wristband_id: scannedHN,
+          blood_bag_id: session.bloodBag!.id,
+          blood_component: session.bloodBag!.component,
+          blood_group_bag: session.bloodBag!.bloodGroup,
           match_result: 'FAIL',
-          alert_reason: reasons.join(' | '),
+          alert_reason: reason,
           nurse_1_name: nurse1Name,
           nurse_2_name: '',
           started_at: new Date().toISOString(),
         }),
       })
-      session.clearSession()
     } else {
-      setMatchPassed(true)
+      setWristbandVerified(true)
     }
   }
 
-  const bag = session.bloodBag
-  const blocked = bag ? (isExpired(bag.expiryISO) || bag.crossMatch === 'Incompatible') : false
+  async function handleBagRescan(raw: string) {
+    const scanned = raw.trim()
+    if (scanned !== session.bloodBag!.id) {
+      playAlert()
+      const reason = `ถุงเลือดไม่ตรง: บันทึก ${session.bloodBag!.id} / Scan ได้ ${scanned}`
+      setStep2Fail(true)
+      setStep2FailReason(reason)
+      await fetch('/api/logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          wristband_id: session.patientData!.wristbandId,
+          blood_bag_id: scanned,
+          blood_component: session.bloodBag!.component,
+          blood_group_bag: session.bloodBag!.bloodGroup,
+          match_result: 'FAIL',
+          alert_reason: reason,
+          nurse_1_name: nurse1Name,
+          nurse_2_name: '',
+          started_at: new Date().toISOString(),
+        }),
+      })
+    } else {
+      session.nextStep()
+    }
+  }
+
+  function handleStep2Reset() {
+    session.clearSession()
+    setStep2Fail(false)
+    setStep2FailReason('')
+    setWristbandVerified(false)
+  }
 
   return (
     <div>
       <StepIndicator currentStep={session.step} />
 
-      {session.step === 1 && <PatientStep session={session} />}
+      {session.step === 1 && <PatientStep session={session} nurse1Name={nurse1Name} />}
 
       {session.step === 2 && (
         <div className="space-y-4">
@@ -93,50 +105,27 @@ export default function ScanPage() {
             />
           )}
 
-          {!matchFailed && (
-            <BarcodeScanner onScan={handleBloodBagScan} label="Scan ถุงเลือด" />
-          )}
-
-          {scanError && <AlertBanner type="warning" title={scanError} />}
-
-          {matchFailed && (
+          {step2Fail && (
             <div className="space-y-3">
-              <AlertBanner
-                type="danger"
-                title="ไม่ตรง — ห้ามให้เลือด"
-                message="บันทึก FAIL Log แล้ว — ส่งถุงเลือดคืน Blood Bank"
-              />
+              <AlertBanner type="danger" title="ตรวจสอบไม่ผ่าน — ห้ามให้เลือด" message={step2FailReason} />
               <button
-                onClick={() => { setMatchFailed(false); setMatchPassed(false); setScanError(null) }}
+                onClick={handleStep2Reset}
                 className="w-full border border-gray-200 text-sm text-gray-600 py-2 rounded hover:border-gray-400 transition-colors"
               >
-                เริ่มผู้ป่วยรายใหม่
+                เริ่มต้นใหม่
               </button>
             </div>
           )}
 
-          {bag && !matchFailed && (
-            <div className="space-y-4">
-              <BloodBagCard bag={bag} />
+          {!step2Fail && !wristbandVerified && (
+            <BarcodeScanner onScan={handleWristbandScan} label="Scan ป้ายข้อมือผู้ป่วย" />
+          )}
 
-              {isExpired(bag.expiryISO) && (
-                <AlertBanner type="danger" title="ถุงเลือดหมดอายุ — ห้ามใช้" message="ส่งถุงเลือดคืน Blood Bank" />
-              )}
-              {bag.crossMatch === 'Incompatible' && (
-                <AlertBanner type="danger" title="Cross-match: Incompatible — ห้ามให้เลือด" message="ส่งถุงเลือดคืน Blood Bank" />
-              )}
-
-              {matchPassed && !blocked && (
-                <div className="space-y-3">
-                  <AlertBanner type="success" title="✅ ตรวจสอบผ่าน — หมู่เลือดและชนิดตรงกัน" />
-                  <button
-                    onClick={() => session.nextStep()}
-                    className="w-full bg-primary hover:bg-primary-dark text-white text-sm font-medium py-3 rounded transition-colors"
-                  >
-                    ยืนยัน → ขั้นตอนยืนยัน 2 พยาบาล
-                  </button>
-                </div>
-              )}
+          {!step2Fail && wristbandVerified && (
+            <div className="space-y-3">
+              <AlertBanner type="success" title="✅ ผู้ป่วยถูกคน" />
+              {session.bloodBag && <BloodBagCard bag={session.bloodBag} />}
+              <BarcodeScanner onScan={handleBagRescan} label="Scan ถุงเลือดอีกครั้ง" />
             </div>
           )}
         </div>

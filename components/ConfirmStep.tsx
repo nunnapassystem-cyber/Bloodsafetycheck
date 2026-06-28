@@ -69,7 +69,7 @@ export function ConfirmStep({ session }: Props) {
     )
   }
 
-  if (!session.bloodBag || !session.patientData || !session.orderedComponent) return null
+  if (!session.bloodBag || !session.patientData) return null
 
   return (
     <div className="space-y-4">

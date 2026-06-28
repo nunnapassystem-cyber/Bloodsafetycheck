@@ -31,7 +31,7 @@ export function PatientCard({ patient, bloodGroup, orderedComponent }: Props) {
         )}
         {orderedComponent && (
           <div className="flex justify-between items-center">
-            <span className="text-xs font-medium text-gray-500">ชนิดที่สั่ง</span>
+            <span className="text-xs font-medium text-gray-500">Component</span>
             <span className="text-sm font-medium text-gray-900">{orderedComponent}</span>
           </div>
         )}

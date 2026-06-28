@@ -17,8 +17,7 @@ export interface BloodBagData {
   id: string
   component: 'PRC' | 'FFP' | 'Platelet' | 'WB'
   bloodGroup: string
-  expiryISO: string
-  crossMatch: 'Compatible' | 'Incompatible'
+  volumeMl: number
 }
 
 export interface PatientData {

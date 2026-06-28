@@ -1,33 +1,16 @@
-import type { BloodBagData, PatientData } from '@/types'
-
-const VALID_COMPONENTS = ['PRC', 'FFP', 'Platelet', 'WB'] as const
-const VALID_CROSS_MATCH = ['Compatible', 'Incompatible'] as const
-
-export function parseBarcodeBloodBag(raw: string): BloodBagData | null {
-  if (!raw) return null
-  const parts = raw.split('|')
-  if (parts.length !== 5) return null
-  const [id, component, bloodGroup, expiryISO, crossMatch] = parts
-  if (!VALID_COMPONENTS.includes(component as BloodBagData['component'])) return null
-  if (!VALID_CROSS_MATCH.includes(crossMatch as BloodBagData['crossMatch'])) return null
-  return {
-    id,
-    component: component as BloodBagData['component'],
-    bloodGroup,
-    expiryISO,
-    crossMatch: crossMatch as BloodBagData['crossMatch'],
-  }
-}
+import type { PatientData } from '@/types'
 
 export function parseBarcodeWristband(raw: string): PatientData | null {
   if (!raw) return null
-  if (raw.includes('|')) {
-    const parts = raw.split('|')
-    if (parts.length !== 2) return null
-    const [wristbandId, name] = parts
-    if (!wristbandId || !name) return null
-    return { wristbandId, name }
+  const str = raw.trim()
+  if (str.includes('|')) {
+    const parts = str.split('|')
+    const hn = parts[0].replace(/^WB-/i, '').trim()
+    const name = parts[1]?.trim() ?? ''
+    if (!hn) return null
+    return { wristbandId: hn, name }
   }
-  // ป้ายข้อมือโรงพยาบาล: barcode เก็บแค่ HN
-  return { wristbandId: raw.trim(), name: '' }
+  const hn = str.replace(/^WB-/i, '').trim()
+  if (!hn) return null
+  return { wristbandId: hn, name: '' }
 }
