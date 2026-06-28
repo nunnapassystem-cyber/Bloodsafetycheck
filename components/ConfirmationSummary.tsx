@@ -11,7 +11,7 @@ export function ConfirmationSummary({ bloodBag, patientData, patientBloodGroup }
       <Row label="Blood Group ถุงเลือด" value={bloodBag.bloodGroup} mono />
       <Row label="Component" value={bloodBag.component} />
       <Row label="ปริมาณ" value={`${bloodBag.volumeMl} ml`} />
-      <Row label="หมายเลขถุง" value={bloodBag.id} mono />
+      <Row label="Barcode เลือด" value={bloodBag.id} mono />
       <div className="flex justify-between items-center pt-2 border-t border-gray-100">
         <span className="text-xs font-medium text-gray-500">ผลการตรวจสอบ</span>
         <span className="text-sm font-semibold text-success">✅ PASS</span>
