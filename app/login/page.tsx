@@ -50,12 +50,18 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="w-full">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/srk-banner.jpg" alt="SRK Safe Blood Transfusion System"
+          className="w-full object-cover" style={{ maxHeight: 220 }} />
+      </div>
+      <div className="flex-1 flex items-start justify-center px-4 pt-6">
       <div className="w-full max-w-sm bg-white border border-gray-200 rounded-lg p-8 shadow-sm">
-        <h1 className="text-base font-semibold text-gray-900 mb-1">
-          Safe Blood Transfusion System
+        <h1 className="text-xl font-bold text-gray-900 mb-1">
+          SRK Safe Blood Transfusion System
         </h1>
-        <p className="text-xs text-gray-500 mb-6">ระบบตรวจสอบความปลอดภัยการให้เลือด</p>
+        <p className="text-sm text-gray-500 mb-6">ระบบตรวจสอบความปลอดภัยการให้เลือด</p>
 
         {error && (
           <div className="bg-danger-light border border-danger text-danger text-sm font-medium rounded p-3 mb-4">
@@ -115,6 +121,7 @@ export default function LoginPage() {
             {loading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
           </button>
         </div>
+      </div>
       </div>
     </div>
   )
