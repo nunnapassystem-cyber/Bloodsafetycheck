@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { KPICard } from '@/components/KPICard'
 import { AuditTable } from '@/components/AuditTable'
@@ -39,6 +39,7 @@ export default function AdminPage() {
   const [creating, setCreating] = useState(false)
 
   const [nurseSearch, setNurseSearch] = useState('')
+  const createFormRef = useRef<HTMLDivElement>(null)
 
   const [resetUserId, setResetUserId] = useState<string | null>(null)
   const [resetPassword, setResetPassword] = useState('')
@@ -219,7 +220,47 @@ export default function AdminPage() {
 
         {showUserMgmt && (
           <div className="border-t border-gray-200 p-4 space-y-5">
-            <div className="space-y-3">
+
+            {/* Ward Coverage */}
+            {!nurseLoading && (
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-gray-500">สถานะ Ward (มี User / ไม่มี User)</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {WARDS.filter(w => w.id !== 'admin').map(w => {
+                    const count = nurses.filter(n => n.ward_id === w.id).length
+                    const hasUser = count > 0
+                    return (
+                      <div
+                        key={w.id}
+                        className={`flex items-center justify-between rounded px-3 py-2 text-xs border ${hasUser ? 'border-success bg-success-light' : 'border-danger bg-danger-light'}`}
+                      >
+                        <span className={`font-medium ${hasUser ? 'text-success' : 'text-danger'}`}>
+                          {hasUser ? '✅' : '⚠️'} {w.name}
+                        </span>
+                        {hasUser
+                          ? <span className="text-success font-mono">{count} คน</span>
+                          : (
+                            <button
+                              onClick={() => {
+                                setNewWardId(w.id)
+                                setCreateError(null)
+                                setCreateSuccess(false)
+                                createFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                              }}
+                              className="text-danger font-semibold underline"
+                            >
+                              เพิ่ม
+                            </button>
+                          )
+                        }
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div ref={createFormRef} className="space-y-3">
               <p className="text-xs font-medium text-gray-500">เพิ่ม Nurse User ใหม่</p>
               <div className="grid grid-cols-1 gap-3">
                 <div>
