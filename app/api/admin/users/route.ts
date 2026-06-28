@@ -21,11 +21,22 @@ export async function POST(request: Request) {
     { auth: { autoRefreshToken: false, persistSession: false } }
   )
 
+  const assignedRole = ward_id === 'admin' ? 'admin' : 'nurse'
+  if (assignedRole === 'admin') {
+    const { data: allUsers } = await adminClient.auth.admin.listUsers()
+    const adminCount = (allUsers?.users ?? []).filter(u =>
+      u.user_metadata?.ward_id === ward_id && u.user_metadata?.role === 'admin'
+    ).length
+    if (adminCount >= 2) {
+      return NextResponse.json({ error: 'Ward นี้มี Admin ครบ 2 คนแล้ว — ไม่สามารถเพิ่มได้' }, { status: 400 })
+    }
+  }
+
   const { data, error } = await adminClient.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
-    user_metadata: { ward_id, ward_name, nurse_name, role: ward_id === 'admin' ? 'admin' : 'nurse' },
+    user_metadata: { ward_id, ward_name, nurse_name, role: assignedRole },
   })
 
   if (error) {
@@ -67,6 +78,20 @@ export async function PATCH(request: Request) {
   if (nurse_name || ward_id || role) {
     const { data: existing } = await adminClient.auth.admin.getUserById(userId)
     const meta = existing?.user?.user_metadata ?? {}
+
+    if (role === 'admin' && meta.role !== 'admin') {
+      const effectiveWardId = ward_id ?? meta.ward_id
+      const { data: allUsers } = await adminClient.auth.admin.listUsers()
+      const adminCount = (allUsers?.users ?? []).filter(u =>
+        u.user_metadata?.ward_id === effectiveWardId &&
+        u.user_metadata?.role === 'admin' &&
+        u.id !== userId
+      ).length
+      if (adminCount >= 2) {
+        return NextResponse.json({ error: 'Ward นี้มี Admin ครบ 2 คนแล้ว — ไม่สามารถเพิ่มได้' }, { status: 400 })
+      }
+    }
+
     const { error } = await adminClient.auth.admin.updateUserById(userId, {
       user_metadata: {
         ...meta,
