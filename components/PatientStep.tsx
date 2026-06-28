@@ -10,7 +10,7 @@ import type { BloodBagData } from '@/types'
 
 const ABO_GROUPS = ['A', 'B', 'O', 'AB'] as const
 const RH_OPTIONS = ['Positive', 'Negative'] as const
-const COMPONENTS = ['PRC', 'FFP', 'Platelet', 'WB'] as const
+const COMPONENTS = ['PRC', 'LPRC', 'FFP', 'Platelet', 'WB'] as const
 
 interface Props {
   session: ReturnType<typeof usePatientSession>

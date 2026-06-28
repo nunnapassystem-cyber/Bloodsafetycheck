@@ -4,7 +4,7 @@ export interface TransfusionLog {
   ward_id: string
   wristband_id: string
   blood_bag_id: string
-  blood_component: 'PRC' | 'FFP' | 'Platelet' | 'WB'
+  blood_component: 'PRC' | 'LPRC' | 'FFP' | 'Platelet' | 'WB'
   blood_group_bag: string
   match_result: 'PASS' | 'FAIL'
   alert_reason: string | null
@@ -15,7 +15,7 @@ export interface TransfusionLog {
 
 export interface BloodBagData {
   id: string
-  component: 'PRC' | 'FFP' | 'Platelet' | 'WB'
+  component: 'PRC' | 'LPRC' | 'FFP' | 'Platelet' | 'WB'
   bloodGroup: string
   volumeMl: number
 }
