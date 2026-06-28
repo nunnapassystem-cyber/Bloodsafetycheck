@@ -82,7 +82,7 @@ export function BarcodeScanner({ onScan, label }: Props) {
         } else {
           setCountdown(n)
         }
-      }, 1000)
+      }, 500)
     } catch {
       setScanning(false)
       setError('ไม่สามารถเปิดกล้องได้ — กรุณากรอกรหัสด้วยมือ')
