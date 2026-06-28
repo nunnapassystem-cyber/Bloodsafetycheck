@@ -30,6 +30,7 @@ export function PatientStep({ session, nurse1Name }: Props) {
   const [volumeMl, setVolumeMl] = useState('')
   const [scanError, setScanError] = useState<string | null>(null)
   const [formError, setFormError] = useState<string | null>(null)
+  const [editingHN, setEditingHN] = useState(false)
   const [bgFail, setBgFail] = useState(false)
   const [bgFailReason, setBgFailReason] = useState('')
 
@@ -107,7 +108,7 @@ export function PatientStep({ session, nurse1Name }: Props) {
     setChartHN(''); setBagBarcode(''); setPatientName('')
     setPatABO(''); setPatRh(''); setBagABO(''); setBagRh('')
     setOrderedComponent(''); setBagComponent(''); setVolumeMl('')
-    setFormError(null); setScanError(null)
+    setFormError(null); setScanError(null); setEditingHN(false)
   }
 
   return (
@@ -133,9 +134,42 @@ export function PatientStep({ session, nurse1Name }: Props) {
 
       {!bgFail && chartHN && !bagBarcode && (
         <div className="space-y-3">
-          <div className="flex justify-between items-center bg-primary-light border border-primary rounded px-3 py-2">
-            <span className="text-xs font-medium text-primary">HN (จากชาร์ท)</span>
-            <span className="font-mono text-sm font-semibold text-primary">{chartHN}</span>
+          {editingHN ? (
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={chartHN}
+                onChange={e => setChartHN(e.target.value)}
+                className="flex-1 border border-primary rounded px-3 py-2 text-sm font-mono focus:outline-none"
+                autoFocus
+                onKeyDown={e => { if (e.key === 'Enter') setEditingHN(false) }}
+              />
+              <button
+                onClick={() => setEditingHN(false)}
+                className="px-3 py-2 bg-primary text-white text-xs rounded"
+              >
+                ยืนยัน
+              </button>
+            </div>
+          ) : (
+            <div className="flex justify-between items-center bg-primary-light border border-primary rounded px-3 py-2">
+              <span className="text-xs font-medium text-primary">HN (จากชาร์ท)</span>
+              <span className="font-mono text-sm font-semibold text-primary">{chartHN}</span>
+            </div>
+          )}
+          <div className="flex gap-2">
+            <button
+              onClick={() => { setChartHN(''); setPatientName(''); setScanError(null); setEditingHN(false) }}
+              className="flex-1 border border-gray-200 text-xs text-gray-500 py-2 rounded hover:border-gray-400 transition-colors"
+            >
+              Scan ใหม่
+            </button>
+            <button
+              onClick={() => setEditingHN(true)}
+              className="flex-1 border border-gray-200 text-xs text-gray-500 py-2 rounded hover:border-gray-400 transition-colors"
+            >
+              พิมพ์ HN เอง
+            </button>
           </div>
           <BarcodeScanner onScan={handleBagScan} label="Scan ถุงเลือด" />
         </div>
@@ -150,7 +184,15 @@ export function PatientStep({ session, nurse1Name }: Props) {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <span className="text-xs font-medium text-gray-500">HN (จากชาร์ท)</span>
-                <span className="font-mono text-sm font-semibold text-gray-900">{chartHN}</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-sm font-semibold text-gray-900">{chartHN}</span>
+                  <button
+                    onClick={() => { setChartHN(''); setPatientName(''); setBagBarcode(''); setScanError(null); setEditingHN(false) }}
+                    className="text-xs text-primary underline"
+                  >
+                    Scan ใหม่
+                  </button>
+                </div>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-xs font-medium text-gray-500">รหัสถุงเลือด</span>
