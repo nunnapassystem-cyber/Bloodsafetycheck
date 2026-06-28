@@ -77,7 +77,6 @@ export function ConfirmStep({ session }: Props) {
         bloodBag={session.bloodBag}
         patientData={session.patientData}
         patientBloodGroup={session.patientBloodGroup}
-        orderedComponent={session.orderedComponent}
       />
       <div className="space-y-3">
         <div>

@@ -1,8 +1,8 @@
 import type { BloodBagData, PatientData } from '@/types'
 
-interface Props { bloodBag: BloodBagData; patientData: PatientData; patientBloodGroup: string; orderedComponent: string }
+interface Props { bloodBag: BloodBagData; patientData: PatientData; patientBloodGroup: string }
 
-export function ConfirmationSummary({ bloodBag, patientData, patientBloodGroup, orderedComponent }: Props) {
+export function ConfirmationSummary({ bloodBag, patientData, patientBloodGroup }: Props) {
   return (
     <div className="border border-gray-200 rounded-lg p-4 space-y-3">
       <p className="text-xs font-medium text-gray-500">สรุปก่อนยืนยัน</p>
