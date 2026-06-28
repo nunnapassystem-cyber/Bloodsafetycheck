@@ -1,45 +1,78 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
-import { Html5Qrcode } from 'html5-qrcode'
+import { useEffect, useRef, useState, useCallback } from 'react'
 
 interface Props {
   onScan: (text: string) => void
   label: string
 }
 
+declare class BarcodeDetector {
+  constructor(options: { formats: string[] })
+  detect(source: HTMLVideoElement): Promise<Array<{ rawValue: string }>>
+}
+
+const BARCODE_FORMATS = ['code_128', 'code_39', 'ean_13', 'ean_8', 'qr_code', 'pdf417', 'itf', 'data_matrix', 'aztec']
+
 export function BarcodeScanner({ onScan, label }: Props) {
   const [scanning, setScanning] = useState(false)
   const [manual, setManual] = useState(false)
   const [manualInput, setManualInput] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const scannerRef = useRef<Html5Qrcode | null>(null)
-  const containerId = `qr-${label.replace(/\s+/g, '-')}`
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const streamRef = useRef<MediaStream | null>(null)
+  const rafRef = useRef<number | null>(null)
+  const detectorRef = useRef<BarcodeDetector | null>(null)
+
+  const stopScan = useCallback(() => {
+    if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null }
+    if (streamRef.current) { streamRef.current.getTracks().forEach(t => t.stop()); streamRef.current = null }
+    if (videoRef.current) videoRef.current.srcObject = null
+    setScanning(false)
+  }, [])
+
+  function scanLoop() {
+    async function detect() {
+      if (!videoRef.current || !streamRef.current || !detectorRef.current) return
+      if (videoRef.current.readyState >= 2) {
+        try {
+          const results = await detectorRef.current.detect(videoRef.current)
+          if (results.length > 0) {
+            stopScan()
+            onScan(results[0].rawValue)
+            return
+          }
+        } catch {}
+      }
+      rafRef.current = requestAnimationFrame(detect)
+    }
+    rafRef.current = requestAnimationFrame(detect)
+  }
 
   async function startScan() {
     setError(null)
+    if (!('BarcodeDetector' in window)) {
+      setError('เบราว์เซอร์นี้ไม่รองรับ auto-scan — กรุณากรอกรหัสด้วยมือ')
+      return
+    }
     setScanning(true)
-    const scanner = new Html5Qrcode(containerId)
-    scannerRef.current = scanner
     try {
-      await scanner.start(
-        { facingMode: 'environment' },
-        { fps: 10, qrbox: { width: 250, height: 150 } },
-        (decodedText) => { stopScan(); onScan(decodedText) },
-        undefined
-      )
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' }
+      })
+      streamRef.current = stream
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+        await videoRef.current.play()
+      }
+      detectorRef.current = new BarcodeDetector({ formats: BARCODE_FORMATS })
+      scanLoop()
     } catch {
       setScanning(false)
       setError('ไม่สามารถเปิดกล้องได้ — กรุณากรอกรหัสด้วยมือ')
     }
   }
 
-  async function stopScan() {
-    if (scannerRef.current) {
-      try { await scannerRef.current.stop() } catch {}
-      scannerRef.current = null
-    }
-    setScanning(false)
-  }
+  useEffect(() => () => stopScan(), [stopScan])
 
   function handleManualSubmit() {
     if (!manualInput.trim()) return
@@ -47,8 +80,6 @@ export function BarcodeScanner({ onScan, label }: Props) {
     setManualInput('')
     setManual(false)
   }
-
-  useEffect(() => () => { stopScan() }, [])
 
   return (
     <div className="space-y-3">
@@ -71,8 +102,18 @@ export function BarcodeScanner({ onScan, label }: Props) {
 
       {scanning && (
         <div className="space-y-2">
-          <div id={containerId} className="w-full border border-gray-200 min-h-[60vw] max-h-[360px]" />
-          <button onClick={stopScan} className="w-full border border-gray-200 text-sm text-gray-500 py-2 rounded hover:border-gray-400 transition-colors">
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            playsInline
+            className="w-full rounded border border-gray-200"
+            style={{ maxHeight: 360 }}
+          />
+          <button
+            onClick={stopScan}
+            className="w-full border border-gray-200 text-sm text-gray-500 py-2 rounded hover:border-gray-400 transition-colors"
+          >
             ยกเลิก
           </button>
         </div>
@@ -90,10 +131,16 @@ export function BarcodeScanner({ onScan, label }: Props) {
             autoFocus
           />
           <div className="flex gap-2">
-            <button onClick={handleManualSubmit} className="flex-1 bg-primary hover:bg-primary-dark text-white text-sm font-medium py-2 rounded transition-colors">
+            <button
+              onClick={handleManualSubmit}
+              className="flex-1 bg-primary hover:bg-primary-dark text-white text-sm font-medium py-2 rounded transition-colors"
+            >
               ยืนยัน
             </button>
-            <button onClick={() => { setManual(false); setManualInput('') }} className="px-4 border border-gray-200 text-sm text-gray-500 py-2 rounded hover:border-gray-400 transition-colors">
+            <button
+              onClick={() => { setManual(false); setManualInput('') }}
+              className="px-4 border border-gray-200 text-sm text-gray-500 py-2 rounded hover:border-gray-400 transition-colors"
+            >
               ยกเลิก
             </button>
           </div>
