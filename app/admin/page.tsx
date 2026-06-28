@@ -38,6 +38,31 @@ export default function AdminPage() {
   const [createSuccess, setCreateSuccess] = useState(false)
   const [creating, setCreating] = useState(false)
 
+  const [resetUserId, setResetUserId] = useState<string | null>(null)
+  const [resetPassword, setResetPassword] = useState('')
+  const [resetMsg, setResetMsg] = useState<{ id: string; ok: boolean; text: string } | null>(null)
+  const [resetting, setResetting] = useState(false)
+
+  async function handleResetPassword(userId: string) {
+    if (!resetPassword) return
+    setResetting(true)
+    setResetMsg(null)
+    const res = await fetch('/api/admin/users', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, password: resetPassword }),
+    })
+    setResetting(false)
+    if (!res.ok) {
+      const d = await res.json()
+      setResetMsg({ id: userId, ok: false, text: d.error ?? 'ไม่สำเร็จ' })
+    } else {
+      setResetMsg({ id: userId, ok: true, text: `✅ Reset แล้ว — รหัสใหม่: ${resetPassword}` })
+      setResetPassword('')
+      setResetUserId(null)
+    }
+  }
+
   const fetchNurses = useCallback(async () => {
     setNurseLoading(true)
     const res = await fetch('/api/admin/users')
@@ -230,16 +255,65 @@ export default function AdminPage() {
                           <tr className="border-b border-gray-200">
                             <th className="text-left text-xs font-medium text-gray-500 pb-2 pr-4">ชื่อพยาบาล</th>
                             <th className="text-left text-xs font-medium text-gray-500 pb-2 pr-4">Ward</th>
-                            <th className="text-left text-xs font-medium text-gray-500 pb-2">Email</th>
+                            <th className="text-left text-xs font-medium text-gray-500 pb-2 pr-4">Email</th>
+                            <th className="text-left text-xs font-medium text-gray-500 pb-2">Reset รหัสผ่าน</th>
                           </tr>
                         </thead>
                         <tbody>
                           {nurses.map(n => (
-                            <tr key={n.id} className="border-b border-gray-100">
-                              <td className="py-2 pr-4 text-gray-900">{n.nurse_name}</td>
-                              <td className="py-2 pr-4 text-gray-700">{n.ward_name || n.ward_id}</td>
-                              <td className="py-2 text-gray-500 font-mono text-xs">{n.email}</td>
-                            </tr>
+                            <>
+                              <tr key={n.id} className="border-b border-gray-100">
+                                <td className="py-2 pr-4 text-gray-900">{n.nurse_name}</td>
+                                <td className="py-2 pr-4 text-gray-700">{n.ward_name || n.ward_id}</td>
+                                <td className="py-2 pr-4 text-gray-500 font-mono text-xs">{n.email}</td>
+                                <td className="py-2">
+                                  {resetUserId === n.id ? (
+                                    <button
+                                      onClick={() => { setResetUserId(null); setResetPassword(''); setResetMsg(null) }}
+                                      className="text-xs text-gray-400 hover:text-gray-600"
+                                    >
+                                      ยกเลิก
+                                    </button>
+                                  ) : (
+                                    <button
+                                      onClick={() => { setResetUserId(n.id); setResetPassword(''); setResetMsg(null) }}
+                                      className="text-xs font-medium text-warning hover:text-warning underline"
+                                    >
+                                      Reset
+                                    </button>
+                                  )}
+                                </td>
+                              </tr>
+                              {resetUserId === n.id && (
+                                <tr key={`reset-${n.id}`} className="bg-warning-light border-b border-gray-100">
+                                  <td colSpan={4} className="px-2 py-3">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs text-gray-600 whitespace-nowrap">รหัสผ่านใหม่:</span>
+                                      <input
+                                        type="text"
+                                        value={resetPassword}
+                                        onChange={e => setResetPassword(e.target.value)}
+                                        placeholder="กรอกรหัสผ่านใหม่"
+                                        className="border border-gray-200 rounded px-2 py-1 text-xs flex-1 focus:outline-none focus:border-primary"
+                                        onKeyDown={e => e.key === 'Enter' && handleResetPassword(n.id)}
+                                      />
+                                      <button
+                                        onClick={() => handleResetPassword(n.id)}
+                                        disabled={resetting || !resetPassword}
+                                        className="bg-warning text-white text-xs font-medium px-3 py-1 rounded disabled:opacity-50 whitespace-nowrap"
+                                      >
+                                        {resetting ? '...' : 'ยืนยัน Reset'}
+                                      </button>
+                                    </div>
+                                    {resetMsg?.id === n.id && (
+                                      <p className={`text-xs mt-1 font-medium ${resetMsg.ok ? 'text-success' : 'text-danger'}`}>
+                                        {resetMsg.text}
+                                      </p>
+                                    )}
+                                  </td>
+                                </tr>
+                              )}
+                            </>
                           ))}
                         </tbody>
                       </table>

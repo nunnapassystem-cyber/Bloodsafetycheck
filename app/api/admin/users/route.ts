@@ -32,6 +32,30 @@ export async function POST(request: Request) {
   return NextResponse.json({ ok: true, id: data.user.id })
 }
 
+export async function PATCH(request: Request) {
+  const supabase = await createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user || user.user_metadata?.role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  const body = await request.json()
+  const { userId, password } = body
+  if (!userId || !password) {
+    return NextResponse.json({ error: 'กรุณาระบุ userId และ password' }, { status: 400 })
+  }
+
+  const adminClient = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  )
+
+  const { error } = await adminClient.auth.admin.updateUserById(userId, { password })
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+  return NextResponse.json({ ok: true })
+}
+
 export async function GET() {
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
