@@ -63,6 +63,9 @@ export function Navbar() {
             Admin
           </a>
         )}
+        <a href="/change-password" className="text-xs font-medium text-gray-500 hover:text-primary transition-colors">
+          เปลี่ยนรหัสผ่าน
+        </a>
       </div>
       <button
         onClick={handleLogout}
