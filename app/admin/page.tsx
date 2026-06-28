@@ -40,6 +40,7 @@ export default function AdminPage() {
   const [creating, setCreating] = useState(false)
 
   const [nurseSearch, setNurseSearch] = useState('')
+  const [selectedCoverageWard, setSelectedCoverageWard] = useState<string | null>(null)
   const createFormRef = useRef<HTMLDivElement>(null)
 
   const [resetUserId, setResetUserId] = useState<string | null>(null)
@@ -230,36 +231,69 @@ export default function AdminPage() {
                 <p className="text-xs font-medium text-gray-500">สถานะ Ward (มี User / ไม่มี User)</p>
                 <div className="grid grid-cols-2 gap-2">
                   {WARDS.map(w => {
-                    const count = nurses.filter(n => n.ward_id === w.id).length
-                    const hasUser = count > 0
-                    return (
+                    const wardUsers = nurses.filter(n => n.ward_id === w.id)
+                    const adminCount = wardUsers.filter(n => n.role === 'admin').length
+                    const nurseCount = wardUsers.filter(n => n.role !== 'admin').length
+                    const hasUser = wardUsers.length > 0
+                    const isSelected = selectedCoverageWard === w.id
+                    return hasUser ? (
+                      <button
+                        key={w.id}
+                        onClick={() => setSelectedCoverageWard(isSelected ? null : w.id)}
+                        className={`flex items-center justify-between rounded px-3 py-2 text-xs border text-left w-full transition-colors ${isSelected ? 'border-success bg-success text-white' : 'border-success bg-success-light'}`}
+                      >
+                        <span className={`font-medium ${isSelected ? 'text-white' : 'text-success'}`}>
+                          ✅ {w.name}
+                        </span>
+                        <span className={`font-mono text-right ${isSelected ? 'text-white' : 'text-success'}`}>
+                          {adminCount > 0 && <span>{adminCount}A </span>}
+                          {nurseCount > 0 && <span>{nurseCount}N</span>}
+                        </span>
+                      </button>
+                    ) : (
                       <div
                         key={w.id}
-                        className={`flex items-center justify-between rounded px-3 py-2 text-xs border ${hasUser ? 'border-success bg-success-light' : 'border-danger bg-danger-light'}`}
+                        className="flex items-center justify-between rounded px-3 py-2 text-xs border border-danger bg-danger-light"
                       >
-                        <span className={`font-medium ${hasUser ? 'text-success' : 'text-danger'}`}>
-                          {hasUser ? '✅' : '⚠️'} {w.name}
-                        </span>
-                        {hasUser
-                          ? <span className="text-success font-mono">{count} คน</span>
-                          : (
-                            <button
-                              onClick={() => {
-                                setNewWardId(w.id)
-                                setCreateError(null)
-                                setCreateSuccess(false)
-                                createFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                              }}
-                              className="text-danger font-semibold underline"
-                            >
-                              เพิ่ม
-                            </button>
-                          )
-                        }
+                        <span className="font-medium text-danger">⚠️ {w.name}</span>
+                        <button
+                          onClick={() => {
+                            setNewWardId(w.id)
+                            setCreateError(null)
+                            setCreateSuccess(false)
+                            createFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                          }}
+                          className="text-danger font-semibold underline"
+                        >
+                          เพิ่ม
+                        </button>
                       </div>
                     )
                   })}
                 </div>
+
+                {selectedCoverageWard && (() => {
+                  const ward = WARDS.find(w => w.id === selectedCoverageWard)
+                  const wardUsers = nurses.filter(n => n.ward_id === selectedCoverageWard)
+                  return (
+                    <div className="border border-success rounded-lg overflow-hidden">
+                      <div className="bg-success-light px-3 py-2 flex items-center justify-between">
+                        <span className="text-xs font-medium text-success">รายชื่อใน {ward?.name}</span>
+                        <button onClick={() => setSelectedCoverageWard(null)} className="text-success text-xs font-bold">✕</button>
+                      </div>
+                      <div className="divide-y divide-gray-100">
+                        {wardUsers.map(u => (
+                          <div key={u.id} className="flex items-center justify-between px-3 py-2">
+                            <span className="text-sm text-gray-900">{u.nurse_name}</span>
+                            <span className={`text-xs font-medium px-2 py-0.5 rounded ${u.role === 'admin' ? 'bg-primary-light text-primary' : 'bg-gray-100 text-gray-500'}`}>
+                              {u.role === 'admin' ? 'Admin' : 'Nurse'}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })()}
               </div>
             )}
 
