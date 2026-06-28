@@ -28,7 +28,17 @@ export async function POST(request: Request) {
     user_metadata: { ward_id, ward_name, nurse_name, role: 'nurse' },
   })
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+  if (error) {
+    const msg = error.message.toLowerCase()
+    const thaiMsg = msg.includes('already been registered') || msg.includes('already registered') || msg.includes('already exists')
+      ? 'Email นี้มีในระบบแล้ว — กรุณาใช้ Email อื่น'
+      : msg.includes('invalid email')
+        ? 'รูปแบบ Email ไม่ถูกต้อง'
+        : msg.includes('password')
+          ? 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร'
+          : 'สร้าง User ไม่สำเร็จ — กรุณาลองใหม่'
+    return NextResponse.json({ error: thaiMsg }, { status: 400 })
+  }
   return NextResponse.json({ ok: true, id: data.user.id })
 }
 
