@@ -166,7 +166,7 @@ export default function AdminPage() {
 
   const wardIds = Array.from(new Set(logs.map(l => l.ward_id)))
   const wardChartData = wardIds.map(w => ({
-    ward: w,
+    ward: WARDS.find(wd => wd.id === w)?.name ?? w,
     PASS: logs.filter(l => l.ward_id === w && l.match_result === 'PASS').length,
     FAIL: logs.filter(l => l.ward_id === w && l.match_result === 'FAIL').length,
   }))
