@@ -2,6 +2,10 @@ export function isBloodGroupMatch(patientBG: string, bagBG: string): boolean {
   return patientBG.trim().toUpperCase() === bagBG.trim().toUpperCase()
 }
 
+export function isComponentMatch(ordered: string, bagComponent: string): boolean {
+  return ordered === bagComponent
+}
+
 export function isExpired(expiryDateISO: string): boolean {
   return new Date(expiryDateISO) < new Date()
 }

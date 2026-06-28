@@ -3,8 +3,8 @@ interface Props {
 }
 
 const STEPS = [
-  { n: 1, label: 'Scan ถุงเลือด' },
-  { n: 2, label: 'Scan ป้ายข้อมือ' },
+  { n: 1, label: 'ข้อมูลผู้ป่วย' },
+  { n: 2, label: 'Scan ถุงเลือด' },
   { n: 3, label: 'ยืนยัน 2 พยาบาล' },
 ] as const
 

@@ -69,7 +69,7 @@ export function ConfirmStep({ session }: Props) {
     )
   }
 
-  if (!session.bloodBag || !session.patientData) return null
+  if (!session.bloodBag || !session.patientData || !session.orderedComponent) return null
 
   return (
     <div className="space-y-4">
@@ -77,6 +77,7 @@ export function ConfirmStep({ session }: Props) {
         bloodBag={session.bloodBag}
         patientData={session.patientData}
         patientBloodGroup={session.patientBloodGroup}
+        orderedComponent={session.orderedComponent}
       />
       <div className="space-y-3">
         <div>

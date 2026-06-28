@@ -1,8 +1,8 @@
 import type { PatientData } from '@/types'
 
-interface Props { patient: PatientData; bloodGroup?: string }
+interface Props { patient: PatientData; bloodGroup?: string; orderedComponent?: string }
 
-export function PatientCard({ patient, bloodGroup }: Props) {
+export function PatientCard({ patient, bloodGroup, orderedComponent }: Props) {
   return (
     <div className="border border-primary rounded-lg overflow-hidden">
       <div className="bg-primary-light px-4 py-2 border-b border-primary">
@@ -27,6 +27,12 @@ export function PatientCard({ patient, bloodGroup }: Props) {
           <div className="flex justify-between items-center">
             <span className="text-xs font-medium text-gray-500">Blood Group ผู้ป่วย</span>
             <span className="font-mono text-base font-semibold text-primary">{bloodGroup}</span>
+          </div>
+        )}
+        {orderedComponent && (
+          <div className="flex justify-between items-center">
+            <span className="text-xs font-medium text-gray-500">ชนิดที่สั่ง</span>
+            <span className="text-sm font-medium text-gray-900">{orderedComponent}</span>
           </div>
         )}
       </div>
