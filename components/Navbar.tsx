@@ -11,7 +11,7 @@ export function Navbar() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) return
+      if (!user) { setProfile(null); return }
       setProfile({
         id: user.id,
         email: user.email ?? '',
@@ -21,6 +21,22 @@ export function Navbar() {
         role: user.user_metadata?.role ?? 'nurse',
       })
     })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) { setProfile(null); return }
+      const user = session.user
+      setProfile({
+        id: user.id,
+        email: user.email ?? '',
+        wardId: user.user_metadata?.ward_id ?? '',
+        wardName: user.user_metadata?.ward_name ?? '',
+        nurseName: user.user_metadata?.nurse_name ?? user.email ?? '',
+        role: user.user_metadata?.role ?? 'nurse',
+      })
+    })
+
+    return () => subscription.unsubscribe()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function handleLogout() {
