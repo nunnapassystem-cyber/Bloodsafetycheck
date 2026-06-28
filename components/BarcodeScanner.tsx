@@ -15,6 +15,7 @@ const BARCODE_FORMATS = ['code_128', 'code_39', 'ean_13', 'ean_8', 'qr_code', 'p
 
 export function BarcodeScanner({ onScan, label }: Props) {
   const [scanning, setScanning] = useState(false)
+  const [countdown, setCountdown] = useState<number | null>(null)
   const [manual, setManual] = useState(false)
   const [manualInput, setManualInput] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -22,11 +23,14 @@ export function BarcodeScanner({ onScan, label }: Props) {
   const streamRef = useRef<MediaStream | null>(null)
   const rafRef = useRef<number | null>(null)
   const detectorRef = useRef<BarcodeDetector | null>(null)
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const stopScan = useCallback(() => {
+    if (countdownRef.current) { clearInterval(countdownRef.current); countdownRef.current = null }
     if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null }
     if (streamRef.current) { streamRef.current.getTracks().forEach(t => t.stop()); streamRef.current = null }
     if (videoRef.current) videoRef.current.srcObject = null
+    setCountdown(null)
     setScanning(false)
   }, [])
 
@@ -65,7 +69,20 @@ export function BarcodeScanner({ onScan, label }: Props) {
         await videoRef.current.play()
       }
       detectorRef.current = new BarcodeDetector({ formats: BARCODE_FORMATS })
-      scanLoop()
+
+      setCountdown(3)
+      let n = 3
+      countdownRef.current = setInterval(() => {
+        n -= 1
+        if (n <= 0) {
+          clearInterval(countdownRef.current!)
+          countdownRef.current = null
+          setCountdown(null)
+          scanLoop()
+        } else {
+          setCountdown(n)
+        }
+      }, 1000)
     } catch {
       setScanning(false)
       setError('ไม่สามารถเปิดกล้องได้ — กรุณากรอกรหัสด้วยมือ')
@@ -102,14 +119,21 @@ export function BarcodeScanner({ onScan, label }: Props) {
 
       {scanning && (
         <div className="space-y-2">
-          <video
-            ref={videoRef}
-            autoPlay
-            muted
-            playsInline
-            className="w-full rounded border border-gray-200"
-            style={{ maxHeight: 360 }}
-          />
+          <div className="relative">
+            <video
+              ref={videoRef}
+              autoPlay
+              muted
+              playsInline
+              className="w-full rounded border border-gray-200"
+              style={{ maxHeight: 360 }}
+            />
+            {countdown !== null && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded">
+                <span className="text-white font-bold" style={{ fontSize: 96, lineHeight: 1 }}>{countdown}</span>
+              </div>
+            )}
+          </div>
           <button
             onClick={stopScan}
             className="w-full border border-gray-200 text-sm text-gray-500 py-2 rounded hover:border-gray-400 transition-colors"
