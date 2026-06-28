@@ -4,7 +4,7 @@ import type { BloodBagData, PatientData } from '@/types'
 
 const SESSION_TIMEOUT = 5 * 60 * 1000
 
-export function usePatientSession() {
+export function usePatientSession(onTimeout?: () => void) {
   const [bloodBag, setBloodBagState] = useState<BloodBagData | null>(null)
   const [patientData, setPatientDataState] = useState<PatientData | null>(null)
   const [patientBloodGroup, setPatientBloodGroupState] = useState('')
@@ -23,7 +23,7 @@ export function usePatientSession() {
 
   const resetTimer = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current)
-    timerRef.current = setTimeout(clearSession, SESSION_TIMEOUT)
+    timerRef.current = setTimeout(() => { clearSession(); onTimeout?.() }, SESSION_TIMEOUT)
   }, [clearSession])
 
   useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current) }, [])

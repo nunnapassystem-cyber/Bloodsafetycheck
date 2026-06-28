@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { StepIndicator } from '@/components/StepIndicator'
 import { BarcodeScanner } from '@/components/BarcodeScanner'
 import { BloodBagCard } from '@/components/BloodBagCard'
@@ -11,9 +11,17 @@ import { usePatientSession } from '@/hooks/usePatientSession'
 import { playAlert } from '@/lib/audio'
 import { parseBarcodeWristband } from '@/lib/barcode'
 import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
 
 export default function ScanPage() {
-  const session = usePatientSession()
+  const router = useRouter()
+
+  const handleTimeout = useCallback(async () => {
+    await createClient().auth.signOut()
+    router.push('/login')
+  }, [router])
+
+  const session = usePatientSession(handleTimeout)
   const [nurse1Name, setNurse1Name] = useState('')
 
   // Step 2 state
