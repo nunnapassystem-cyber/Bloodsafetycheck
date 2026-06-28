@@ -52,10 +52,10 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="w-full max-w-sm bg-white border border-gray-200 rounded-lg p-8 shadow-sm">
-        <h1 className="text-xl font-bold text-gray-900 mb-1">
+        <h1 className="text-xl font-bold text-gray-900 mb-1 text-center">
           SRK Safe Blood Transfusion System
         </h1>
-        <p className="text-sm text-gray-500 mb-6">ระบบตรวจสอบความปลอดภัยการให้เลือด</p>
+        <p className="text-sm text-gray-500 mb-6 text-center">ระบบตรวจสอบความปลอดภัยการให้เลือด</p>
 
         {error && (
           <div className="bg-danger-light border border-danger text-danger text-sm font-medium rounded p-3 mb-4">
