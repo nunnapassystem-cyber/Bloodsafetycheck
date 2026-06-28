@@ -1,5 +1,6 @@
 import type { TransfusionLog } from '@/types'
 import { fmtTime } from '@/lib/format'
+import { WARDS } from '@/lib/wards'
 
 interface Props { logs: TransfusionLog[]; showWard?: boolean }
 
@@ -20,7 +21,7 @@ export function AuditTable({ logs, showWard = false }: Props) {
         <tbody>
           {logs.map(log => (
             <tr key={log.id} className="border-b border-gray-100 hover:bg-gray-50">
-              {showWard && <Td>{log.ward_id}</Td>}
+              {showWard && <Td>{WARDS.find(w => w.id === log.ward_id)?.name ?? log.ward_id}</Td>}
               <Td>{fmtTime(log.started_at)}</Td>
               <Td mono>{log.wristband_id}</Td>
               <Td mono>{log.blood_bag_id}</Td>
