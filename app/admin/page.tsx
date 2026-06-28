@@ -38,6 +38,8 @@ export default function AdminPage() {
   const [createSuccess, setCreateSuccess] = useState(false)
   const [creating, setCreating] = useState(false)
 
+  const [nurseSearch, setNurseSearch] = useState('')
+
   const [resetUserId, setResetUserId] = useState<string | null>(null)
   const [resetPassword, setResetPassword] = useState('')
   const [resetMsg, setResetMsg] = useState<{ id: string; ok: boolean; text: string } | null>(null)
@@ -278,7 +280,16 @@ export default function AdminPage() {
             </div>
 
             <div>
-              <p className="text-xs font-medium text-gray-500 mb-2">รายชื่อ Nurse ทั้งหมด</p>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-medium text-gray-500">รายชื่อ Nurse ทั้งหมด</p>
+                <input
+                  type="text"
+                  value={nurseSearch}
+                  onChange={e => setNurseSearch(e.target.value)}
+                  placeholder="ค้นหาชื่อ / Ward..."
+                  className="border border-gray-200 rounded px-2 py-1 text-xs w-44 focus:outline-none focus:border-primary"
+                />
+              </div>
               {nurseLoading
                 ? <p className="text-sm text-gray-400 text-center py-4">กำลังโหลด...</p>
                 : nurses.length === 0
@@ -296,7 +307,12 @@ export default function AdminPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          {nurses.map(n => (
+                          {nurses
+                            .filter(n => {
+                              const q = nurseSearch.toLowerCase()
+                              return !q || n.nurse_name.toLowerCase().includes(q) || (n.ward_name || n.ward_id).toLowerCase().includes(q) || n.email.toLowerCase().includes(q)
+                            })
+                            .map(n => (
                             <>
                               <tr key={n.id} className="border-b border-gray-100">
                                 <td className="py-2 pr-4 text-gray-900">{n.nurse_name}</td>
@@ -397,6 +413,7 @@ export default function AdminPage() {
                             </>
                           ))}
                         </tbody>
+
                       </table>
                     </div>
                   )
