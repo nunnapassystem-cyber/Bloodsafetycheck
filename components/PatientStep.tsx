@@ -127,7 +127,7 @@ export function PatientStep({ session, nurse1Name }: Props) {
 
       {!bgFail && !chartHN && (
         <div className="space-y-3">
-          <BarcodeScanner onScan={handleChartScan} label="Scan สติ๊กเกอร์ชาร์ท (ได้ HN + ชื่อ)" />
+          <BarcodeScanner onScan={handleChartScan} label="Scan ชื่อผู้ป่วย หน้าOrder สั่งให้เลือด" />
           {scanError && <AlertBanner type="warning" title={scanError} />}
         </div>
       )}
