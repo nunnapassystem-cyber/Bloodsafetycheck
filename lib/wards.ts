@@ -9,4 +9,5 @@ export const WARDS: Ward[] = [
   { id: 'ward-C', name: 'อายุรกรรม' },
   { id: 'ward-D', name: 'กุมารเวชกรรม' },
   { id: 'ward-E', name: 'สูติกรรม' },
+  { id: 'admin', name: 'ผู้ดูแลระบบ' },
 ]

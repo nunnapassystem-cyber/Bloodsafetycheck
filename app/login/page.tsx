@@ -1,41 +1,48 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { WARDS } from '@/lib/wards'
 
+interface NurseOption {
+  nurse_name: string
+  email: string
+}
+
 export default function LoginPage() {
   const [wardId, setWardId] = useState('')
-  const [email, setEmail] = useState('')
+  const [nurses, setNurses] = useState<NurseOption[]>([])
+  const [selectedEmail, setSelectedEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [nurseLoading, setNurseLoading] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
+  useEffect(() => {
+    if (!wardId) { setNurses([]); setSelectedEmail(''); return }
+    setNurseLoading(true)
+    setSelectedEmail('')
+    fetch(`/api/nurses?ward_id=${wardId}`)
+      .then(r => r.json())
+      .then(data => { setNurses(Array.isArray(data) ? data : []) })
+      .catch(() => setNurses([]))
+      .finally(() => setNurseLoading(false))
+  }, [wardId])
+
   async function handleLogin() {
-    if (!wardId) {
-      setError('กรุณาเลือก Ward ก่อนเข้าระบบ')
-      return
-    }
-    if (!email || !password) {
-      setError('กรุณากรอกอีเมลและรหัสผ่าน')
-      return
-    }
+    if (!wardId) { setError('กรุณาเลือก Ward ก่อนเข้าระบบ'); return }
+    if (!selectedEmail) { setError('กรุณาเลือกชื่อพยาบาล'); return }
+    if (!password) { setError('กรุณากรอก Password'); return }
     setLoading(true)
     setError(null)
 
-    const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
-    if (authError) {
-      setLoading(false)
-      setError('อีเมลหรือรหัสผ่านไม่ถูกต้อง')
-      return
-    }
+    const { error: authError } = await supabase.auth.signInWithPassword({ email: selectedEmail, password })
+    if (authError) { setLoading(false); setError('ชื่อหรือรหัสผ่านไม่ถูกต้อง'); return }
 
     const ward = WARDS.find(w => w.id === wardId)!
-    await supabase.auth.updateUser({
-      data: { ward_id: ward.id, ward_name: ward.name },
-    })
+    await supabase.auth.updateUser({ data: { ward_id: ward.id, ward_name: ward.name } })
 
     setLoading(false)
     router.push('/scan')
@@ -70,17 +77,24 @@ export default function LoginPage() {
               ))}
             </select>
           </div>
+
           <div>
-            <label className="text-xs font-medium text-gray-500 block mb-1">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="nurse@hospital.com"
-              className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary"
-              onKeyDown={e => e.key === 'Enter' && handleLogin()}
-            />
+            <label className="text-xs font-medium text-gray-500 block mb-1">ชื่อพยาบาล</label>
+            <select
+              value={selectedEmail}
+              onChange={e => { setSelectedEmail(e.target.value); setError(null) }}
+              disabled={!wardId || nurseLoading}
+              className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary disabled:bg-gray-50 disabled:text-gray-400"
+            >
+              <option value="">
+                {nurseLoading ? 'กำลังโหลด...' : !wardId ? 'เลือก Ward ก่อน' : 'เลือกชื่อ...'}
+              </option>
+              {nurses.map(n => (
+                <option key={n.email} value={n.email}>{n.nurse_name}</option>
+              ))}
+            </select>
           </div>
+
           <div>
             <label className="text-xs font-medium text-gray-500 block mb-1">Password</label>
             <input
@@ -92,6 +106,7 @@ export default function LoginPage() {
               onKeyDown={e => e.key === 'Enter' && handleLogin()}
             />
           </div>
+
           <button
             onClick={handleLogin}
             disabled={loading}
