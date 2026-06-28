@@ -48,7 +48,11 @@ export function ConfirmStep({ session }: Props) {
     })
 
     setSaving(false)
-    if (!res.ok) { setError('บันทึกไม่สำเร็จ — กรุณาลองใหม่'); return }
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}))
+      setError(body.error ?? 'บันทึกไม่สำเร็จ — กรุณาลองใหม่')
+      return
+    }
 
     setSavedTime(fmtTime(startedAt))
     setSaved(true)
