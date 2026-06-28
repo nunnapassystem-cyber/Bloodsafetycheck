@@ -31,7 +31,7 @@ export default function AdminPage() {
   const [nurses, setNurses] = useState<NurseUser[]>([])
   const [nurseLoading, setNurseLoading] = useState(false)
   const [newEmail, setNewEmail] = useState('')
-  const [newPassword, setNewPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('Nurse1234')
   const [newNurseName, setNewNurseName] = useState('')
   const [newWardId, setNewWardId] = useState('')
   const [createError, setCreateError] = useState<string | null>(null)
@@ -102,7 +102,7 @@ export default function AdminPage() {
       return
     }
     setCreateSuccess(true)
-    setNewEmail(''); setNewPassword(''); setNewNurseName(''); setNewWardId('')
+    setNewEmail(''); setNewPassword('Nurse1234'); setNewNurseName(''); setNewWardId('')
     fetchNurses()
   }
 
@@ -276,7 +276,7 @@ export default function AdminPage() {
                                     </button>
                                   ) : (
                                     <button
-                                      onClick={() => { setResetUserId(n.id); setResetPassword(''); setResetMsg(null) }}
+                                      onClick={() => { setResetUserId(n.id); setResetPassword('Nurse1234'); setResetMsg(null) }}
                                       className="text-xs font-medium text-warning hover:text-warning underline"
                                     >
                                       Reset
