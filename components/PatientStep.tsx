@@ -201,7 +201,7 @@ export function PatientStep({ session, nurse1Name }: Props) {
             </div>
 
             <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1">ชื่อ-สกุล ผู้ป่วย (จากแบบบันทึกการให้โลหิต)</label>
+              <label className="text-xs font-medium text-primary block mb-1">ชื่อ-สกุล ผู้ป่วย (จากแบบบันทึกการให้โลหิต)</label>
               <input
                 type="text"
                 value={patientName}
@@ -212,7 +212,7 @@ export function PatientStep({ session, nurse1Name }: Props) {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-medium text-gray-500 block">Blood Group ผู้ป่วย (จากแบบบันทึกการให้โลหิต)</label>
+              <label className="text-xs font-medium text-primary block">Blood Group ผู้ป่วย (จากแบบบันทึกการให้โลหิต)</label>
               <div className="grid grid-cols-2 gap-3">
                 <select
                   value={patABO}
@@ -232,15 +232,27 @@ export function PatientStep({ session, nurse1Name }: Props) {
                 </select>
               </div>
               {patABO && patRh && (
-                <div className="flex justify-between items-center bg-gray-50 rounded px-3 py-2">
-                  <span className="text-xs font-medium text-gray-500">Blood Group ผู้ป่วย</span>
+                <div className="flex justify-between items-center bg-primary-light rounded px-3 py-2">
+                  <span className="text-xs font-medium text-primary">Blood Group ผู้ป่วย</span>
                   <span className="font-mono text-base font-semibold text-primary">{patABO}{patRh === 'Positive' ? '+' : '-'}</span>
                 </div>
               )}
             </div>
 
+            <div>
+              <label className="text-xs font-medium text-primary block mb-1">ชนิดเลือดที่สั่ง (Order แพทย์)</label>
+              <select
+                value={orderedComponent}
+                onChange={e => { setOrderedComponent(e.target.value); setFormError(null) }}
+                className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary"
+              >
+                <option value="">เลือกชนิด...</option>
+                {COMPONENTS.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+
             <div className="space-y-2">
-              <label className="text-xs font-medium text-gray-500 block">Blood Group ถุงเลือด (จากป้ายถุงเลือด)</label>
+              <label className="text-xs font-medium text-blood block">Blood Group ถุงเลือด (จากป้ายถุงเลือด)</label>
               <div className="grid grid-cols-2 gap-3">
                 <select
                   value={bagABO}
@@ -260,27 +272,15 @@ export function PatientStep({ session, nurse1Name }: Props) {
                 </select>
               </div>
               {bagABO && bagRh && (
-                <div className="flex justify-between items-center bg-gray-50 rounded px-3 py-2">
-                  <span className="text-xs font-medium text-gray-500">Blood Group ถุงเลือด</span>
+                <div className="flex justify-between items-center bg-danger-light rounded px-3 py-2">
+                  <span className="text-xs font-medium text-blood">Blood Group ถุงเลือด</span>
                   <span className="font-mono text-base font-semibold text-blood">{bagABO}{bagRh === 'Positive' ? '+' : '-'}</span>
                 </div>
               )}
             </div>
 
             <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1">ชนิดเลือดที่สั่ง (Order แพทย์)</label>
-              <select
-                value={orderedComponent}
-                onChange={e => { setOrderedComponent(e.target.value); setFormError(null) }}
-                className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary"
-              >
-                <option value="">เลือกชนิด...</option>
-                {COMPONENTS.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
-
-            <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1">ชนิดเลือดในถุง (จากป้ายถุงเลือด)</label>
+              <label className="text-xs font-medium text-blood block mb-1">ชนิดเลือดในถุง (จากป้ายถุงเลือด)</label>
               <select
                 value={bagComponent}
                 onChange={e => { setBagComponent(e.target.value); setFormError(null) }}
@@ -292,14 +292,14 @@ export function PatientStep({ session, nurse1Name }: Props) {
             </div>
 
             <div>
-              <label className="text-xs font-medium text-gray-500 block mb-1">ปริมาณ (ml)</label>
+              <label className="text-xs font-medium text-blood block mb-1">ปริมาณ (ml)</label>
               <input
                 type="number"
                 value={volumeMl}
                 onChange={e => { setVolumeMl(e.target.value); setFormError(null) }}
                 placeholder="เช่น 250, 300, 400"
                 min="1"
-                className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary"
+                className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-blood"
               />
             </div>
 
