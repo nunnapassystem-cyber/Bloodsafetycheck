@@ -16,6 +16,7 @@ interface NurseUser {
   nurse_name: string
   ward_id: string
   ward_name: string
+  role: string
 }
 
 function todayISO(): string { return new Date().toISOString().slice(0, 10) }
@@ -49,6 +50,7 @@ export default function AdminPage() {
   const [editUserId, setEditUserId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
   const [editWardId, setEditWardId] = useState('')
+  const [editRole, setEditRole] = useState('nurse')
   const [editMsg, setEditMsg] = useState<{ id: string; ok: boolean; text: string } | null>(null)
   const [editing, setEditing] = useState(false)
 
@@ -56,6 +58,7 @@ export default function AdminPage() {
     setEditUserId(n.id)
     setEditName(n.nurse_name)
     setEditWardId(n.ward_id)
+    setEditRole(n.role ?? 'nurse')
     setEditMsg(null)
     setResetUserId(null)
   }
@@ -68,7 +71,7 @@ export default function AdminPage() {
     const res = await fetch('/api/admin/users', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, nurse_name: editName.trim(), ward_id: ward.id, ward_name: ward.name }),
+      body: JSON.stringify({ userId, nurse_name: editName.trim(), ward_id: ward.id, ward_name: ward.name, role: editRole }),
     })
     setEditing(false)
     if (!res.ok) {
@@ -343,6 +346,7 @@ export default function AdminPage() {
                             <th className="text-left text-xs font-medium text-gray-500 pb-2 pr-4">ชื่อพยาบาล</th>
                             <th className="text-left text-xs font-medium text-gray-500 pb-2 pr-4">Ward</th>
                             <th className="text-left text-xs font-medium text-gray-500 pb-2 pr-4">Email</th>
+                            <th className="text-left text-xs font-medium text-gray-500 pb-2 pr-2">สถานะ</th>
                             <th className="text-left text-xs font-medium text-gray-500 pb-2 pr-2">แก้ไข</th>
                             <th className="text-left text-xs font-medium text-gray-500 pb-2">Reset รหัสผ่าน</th>
                           </tr>
@@ -359,6 +363,11 @@ export default function AdminPage() {
                                 <td className="py-2 pr-4 text-gray-900">{n.nurse_name}</td>
                                 <td className="py-2 pr-4 text-gray-700">{n.ward_name || n.ward_id}</td>
                                 <td className="py-2 pr-4 text-gray-500 font-mono text-xs">{n.email}</td>
+                                <td className="py-2 pr-2">
+                                  <span className={`text-xs font-medium px-2 py-0.5 rounded ${n.role === 'admin' ? 'bg-primary-light text-primary' : 'bg-gray-100 text-gray-500'}`}>
+                                    {n.role === 'admin' ? 'Admin' : 'Nurse'}
+                                  </span>
+                                </td>
                                 <td className="py-2 pr-2">
                                   {editUserId === n.id ? (
                                     <button onClick={() => setEditUserId(null)} className="text-xs text-gray-400 hover:text-gray-600">ยกเลิก</button>
@@ -388,7 +397,7 @@ export default function AdminPage() {
                               </tr>
                               {editUserId === n.id && (
                                 <tr key={`edit-${n.id}`} className="bg-primary-light border-b border-gray-100">
-                                  <td colSpan={5} className="px-2 py-3 space-y-2">
+                                  <td colSpan={6} className="px-2 py-3 space-y-2">
                                     <div className="flex items-center gap-2">
                                       <span className="text-xs text-gray-600 whitespace-nowrap w-20">ชื่อ-นามสกุล:</span>
                                       <input
@@ -405,9 +414,20 @@ export default function AdminPage() {
                                         onChange={e => setEditWardId(e.target.value)}
                                         className="border border-gray-200 rounded px-2 py-1 text-xs flex-1 focus:outline-none focus:border-primary"
                                       >
-                                        {WARDS.filter(w => w.id !== 'admin').map(w => (
+                                        {WARDS.map(w => (
                                           <option key={w.id} value={w.id}>{w.name}</option>
                                         ))}
+                                      </select>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs text-gray-600 whitespace-nowrap w-20">สถานะ:</span>
+                                      <select
+                                        value={editRole}
+                                        onChange={e => setEditRole(e.target.value)}
+                                        className="border border-gray-200 rounded px-2 py-1 text-xs flex-1 focus:outline-none focus:border-primary"
+                                      >
+                                        <option value="nurse">Nurse</option>
+                                        <option value="admin">Admin</option>
                                       </select>
                                       <button
                                         onClick={() => handleEdit(n.id)}
@@ -425,7 +445,7 @@ export default function AdminPage() {
                               )}
                               {resetUserId === n.id && (
                                 <tr key={`reset-${n.id}`} className="bg-warning-light border-b border-gray-100">
-                                  <td colSpan={5} className="px-2 py-3">
+                                  <td colSpan={6} className="px-2 py-3">
                                     <div className="flex items-center gap-2">
                                       <span className="text-xs text-gray-600 whitespace-nowrap">รหัสผ่านใหม่:</span>
                                       <input

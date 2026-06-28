@@ -50,7 +50,7 @@ export async function PATCH(request: Request) {
   }
 
   const body = await request.json()
-  const { userId, password, nurse_name, ward_id, ward_name } = body
+  const { userId, password, nurse_name, ward_id, ward_name, role } = body
   if (!userId) return NextResponse.json({ error: 'กรุณาระบุ userId' }, { status: 400 })
 
   const adminClient = createClient(
@@ -64,7 +64,7 @@ export async function PATCH(request: Request) {
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
   }
 
-  if (nurse_name || ward_id) {
+  if (nurse_name || ward_id || role) {
     const { data: existing } = await adminClient.auth.admin.getUserById(userId)
     const meta = existing?.user?.user_metadata ?? {}
     const { error } = await adminClient.auth.admin.updateUserById(userId, {
@@ -72,6 +72,7 @@ export async function PATCH(request: Request) {
         ...meta,
         ...(nurse_name ? { nurse_name } : {}),
         ...(ward_id ? { ward_id, ward_name: ward_name ?? ward_id } : {}),
+        ...(role ? { role } : {}),
       },
     })
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
@@ -97,13 +98,14 @@ export async function GET() {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   const nurses = data.users
-    .filter(u => u.user_metadata?.role === 'nurse')
+    .filter(u => u.user_metadata?.ward_id)
     .map(u => ({
       id: u.id,
       email: u.email,
       nurse_name: u.user_metadata?.nurse_name ?? '',
       ward_id: u.user_metadata?.ward_id ?? '',
       ward_name: u.user_metadata?.ward_name ?? '',
+      role: u.user_metadata?.role ?? 'nurse',
     }))
 
   return NextResponse.json(nurses)
