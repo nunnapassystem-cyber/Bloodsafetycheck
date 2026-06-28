@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     email,
     password,
     email_confirm: true,
-    user_metadata: { ward_id, ward_name, nurse_name, role: 'nurse' },
+    user_metadata: { ward_id, ward_name, nurse_name, role: ward_id === 'admin' ? 'admin' : 'nurse' },
   })
 
   if (error) {
