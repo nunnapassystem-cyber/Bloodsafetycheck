@@ -12,7 +12,7 @@ export const WARDS: Ward[] = [
   { id: 'ward-F', name: 'อายุรกรรมหญิง' },
   { id: 'ward-G', name: 'วิกฤตศัลยกรรม' },
   { id: 'ward-H', name: 'วิกฤตอายุรกรรม' },
-  { id: 'ward-I', name: 'วิกฤตอุบัติเหตุและหัวใจ' },
+  { id: 'ward-I', name: 'วิกฤตอุบัติเหตุ,ศัลยกรรมหัวใจ' },
   { id: 'ward-J', name: 'ห้องผ่าตัดศัลยกรรม' },
   { id: 'ward-K', name: 'ห้องผ่าตัดสูติกรรม' },
   { id: 'ward-L', name: 'อุบัติเหตุชาย' },
