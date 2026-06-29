@@ -47,10 +47,10 @@ function cropImageToBlob(
 export function OcrScanner(props: Props) {
   const buttonLabel = props.label ?? LABEL[props.mode]
   const [dataUrl, setDataUrl]         = useState<string | null>(null)
-  const [cropTop, setCropTop]         = useState(0.15)
-  const [cropBottom, setCropBottom]   = useState(0.55)
-  const [cropLeft, setCropLeft]       = useState(0)
-  const [cropRight, setCropRight]     = useState(1)
+  const [cropTop, setCropTop]         = useState(0.28)
+  const [cropBottom, setCropBottom]   = useState(0.78)
+  const [cropLeft, setCropLeft]       = useState(0.04)
+  const [cropRight, setCropRight]     = useState(0.96)
   const [loading, setLoading]         = useState(false)
   const [error, setError]             = useState<string | null>(null)
   const [rawText, setRawText]         = useState<string | null>(null)
@@ -64,8 +64,8 @@ export function OcrScanner(props: Props) {
     if (!file) return
     setError(null); setRawText(null); setShowManual(false)
     const d = props.mode === 'wristband'
-      ? { top: 0.15, bottom: 0.55, left: 0, right: 1 }
-      : { top: 0.28, bottom: 0.73, left: 0, right: 1 }
+      ? { top: 0.28, bottom: 0.78, left: 0.04, right: 0.96 }
+      : { top: 0.20, bottom: 0.80, left: 0.04, right: 0.96 }
     setCropTop(d.top); setCropBottom(d.bottom)
     setCropLeft(d.left); setCropRight(d.right)
     const reader = new FileReader()
@@ -232,26 +232,26 @@ export function OcrScanner(props: Props) {
 
             {/* ── Handle ซ้าย ── */}
             <div className="absolute top-0 bottom-0 flex items-center justify-center"
-                 style={{ left: `calc(${cropLeft * 100}% - 16px)`, width: 32, cursor: 'ew-resize' }}
+                 style={{ left: `calc(${cropLeft * 100}% - 22px)`, width: 44, cursor: 'ew-resize' }}
                  onTouchMove={e => {
                    e.preventDefault()
                    const rect = containerRef.current!.getBoundingClientRect()
                    setCropLeft(Math.max(0, Math.min(cropRight - 0.05,
                      (e.touches[0].clientX - rect.left) / rect.width)))
                  }}>
-              <div className="h-10 w-2 bg-primary rounded-full opacity-90" />
+              <div className="h-14 w-3 bg-primary rounded-full opacity-95 shadow-md" />
             </div>
 
             {/* ── Handle ขวา ── */}
             <div className="absolute top-0 bottom-0 flex items-center justify-center"
-                 style={{ left: `calc(${cropRight * 100}% - 16px)`, width: 32, cursor: 'ew-resize' }}
+                 style={{ left: `calc(${cropRight * 100}% - 22px)`, width: 44, cursor: 'ew-resize' }}
                  onTouchMove={e => {
                    e.preventDefault()
                    const rect = containerRef.current!.getBoundingClientRect()
                    setCropRight(Math.max(cropLeft + 0.05, Math.min(1,
                      (e.touches[0].clientX - rect.left) / rect.width)))
                  }}>
-              <div className="h-10 w-2 bg-primary rounded-full opacity-90" />
+              <div className="h-14 w-3 bg-primary rounded-full opacity-95 shadow-md" />
             </div>
           </div>
           </div>{/* end centering wrapper */}
