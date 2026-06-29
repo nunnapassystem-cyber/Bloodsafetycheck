@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useRef, useState, useId, useCallback } from 'react'
+import type { Html5Qrcode } from 'html5-qrcode'
 
 interface Props {
   onScan: (text: string) => void
@@ -11,7 +12,7 @@ export function BarcodeScanner({ onScan, label }: Props) {
   const [manual, setManual] = useState(false)
   const [manualInput, setManualInput] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const scannerRef = useRef<any>(null)
+  const scannerRef = useRef<Html5Qrcode | null>(null)
   const rawId = useId()
   const uid = 'qr' + rawId.replace(/:/g, '')
 
