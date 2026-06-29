@@ -61,8 +61,12 @@ export function parseBloodBag(text: string): BloodBagOcr {
   const comp = text.match(/\b(LPRC|PRC|FFP|Platelet|WB)\b/i)?.[1]?.toUpperCase() ?? null
 
   // Gr. : A  — blood group ถุงเลือด (ในกล่องชนิดเลือด)
-  const aboRaw = text.match(/Gr\s*\.?\s*[:：]\s*([ABOO]{1,2})\b/i)?.[1]?.toUpperCase()
-  const abo    = aboRaw === 'OO' ? 'O' : (aboRaw ?? null)
+  // Fallback: หา "A Rh :" หรือ "AB Rh :" — blood group อยู่ก่อน Rh เสมอ
+  const aboRaw =
+    text.match(/Gr\s*\.?\s*[:：]\s*([ABO]{1,2})\b/i)?.[1]?.toUpperCase() ??
+    text.match(/\b([ABO]{1,2})\s+Rh\s*[:：]/i)?.[1]?.toUpperCase() ??
+    null
+  const abo = aboRaw === 'OO' ? 'O' : (aboRaw ?? null)
 
   // Rh : POSITIVE — ในกล่องชนิดเลือด มี space ก่อน : (vs "Rh:" ที่ Patient Bl.gr ไม่มี space)
   const rhRaw =
@@ -70,11 +74,12 @@ export function parseBloodBag(text: string): BloodBagOcr {
     text.match(/Rh[:：]\s*(POSITIVE|NEGATIVE)/i)?.[1]         // "Rh: POSITIVE" fallback
   const rh = rhRaw ? (rhRaw.toUpperCase() === 'POSITIVE' ? 'Positive' : 'Negative') : null
 
-  // หมายเลขถุงเลือด : 302.69.0.04210  (รูปแบบมีจุด ไม่ใช่ตัวเลขล้วน)
-  const bagId =
-    text.match(/หมายเลขถุงเลือด\s*[:：]\s*([\d.]+)/)?.[1] ??
-    text.match(/ถุงเลือด\s*[:：]\s*([\d.]+)/)?.[1] ??
+  // หมายเลขถุงเลือด : 302.69.0.04210  (OCR อาจใส่ space กลางตัวเลข → strip ออก)
+  const bagIdRaw =
+    text.match(/หมายเลขถุงเลือด\s*[:：]\s*(\d[\d.\s]*\d)/)?.[1] ??
+    text.match(/ถุงเลือด\s*[:：]\s*(\d[\d.\s]*\d)/)?.[1] ??
     null
+  const bagId = bagIdRaw?.replace(/\s+/g, '') ?? null
 
   // 265 mL.
   const vol = text.match(/(\d{2,4})\s*mL/i)?.[1]
