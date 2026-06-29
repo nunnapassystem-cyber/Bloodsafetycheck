@@ -18,6 +18,54 @@ const LABEL = {
   bloodbag:  'ถ่ายรูปบัตรคล้องถุงเลือด',
 }
 
+// ปรับภาพอัตโนมัติ: grayscale → auto-contrast → sharpen เพื่อช่วย OCR ในที่แสงน้อย
+function enhanceForOcr(canvas: HTMLCanvasElement): void {
+  const ctx = canvas.getContext('2d')!
+  const { width: w, height: h } = canvas
+  const imageData = ctx.getImageData(0, 0, w, h)
+  const data = imageData.data
+  const n = w * h
+
+  // 1. Grayscale + หา range สำหรับ auto-contrast
+  const gray = new Uint8Array(n)
+  let lo = 255, hi = 0
+  for (let i = 0, p = 0; p < n; i += 4, p++) {
+    const v = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]
+    gray[p] = v
+    if (v < lo) lo = v
+    if (v > hi) hi = v
+  }
+
+  // 2. Stretch contrast 0-255 (auto-brightness + contrast)
+  const range = hi - lo || 1
+  for (let i = 0, p = 0; p < n; i += 4, p++) {
+    const v = Math.round((gray[p] - lo) / range * 255)
+    data[i] = data[i + 1] = data[i + 2] = v
+    data[i + 3] = 255
+  }
+  ctx.putImageData(imageData, 0, 0)
+
+  // 3. Sharpen ด้วย kernel [0,-1,0; -1,5,-1; 0,-1,0]
+  const src = ctx.getImageData(0, 0, w, h).data
+  const out = new Uint8ClampedArray(src.length)
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const p = (y * w + x) * 4
+      if (x === 0 || x === w - 1 || y === 0 || y === h - 1) {
+        out[p] = out[p + 1] = out[p + 2] = src[p]; out[p + 3] = 255; continue
+      }
+      const c = src[p]
+      const t = src[((y - 1) * w + x) * 4]
+      const b = src[((y + 1) * w + x) * 4]
+      const l = src[(y * w + x - 1) * 4]
+      const r = src[(y * w + x + 1) * 4]
+      const v = Math.max(0, Math.min(255, 5 * c - t - b - l - r))
+      out[p] = out[p + 1] = out[p + 2] = v; out[p + 3] = 255
+    }
+  }
+  ctx.putImageData(new ImageData(out, w, h), 0, 0)
+}
+
 function cropImageToBlob(
   src: string,
   crop: { x: number; y: number; w: number; h: number },
@@ -35,6 +83,7 @@ function cropImageToBlob(
         Math.round(img.naturalHeight * crop.y),
         sw, sh, 0, 0, sw, sh,
       )
+      enhanceForOcr(canvas)
       canvas.toBlob(b => resolve(b!), 'image/jpeg', 0.92)
     }
     img.src = src
