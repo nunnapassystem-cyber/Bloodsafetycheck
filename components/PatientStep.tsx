@@ -1,12 +1,12 @@
 'use client'
 import { useState } from 'react'
-import { BarcodeScanner } from '@/components/BarcodeScanner'
+import { OcrScanner } from '@/components/OcrScanner'
 import { AlertBanner } from '@/components/AlertBanner'
-import { parseBarcodeWristband } from '@/lib/barcode'
 import { isBloodGroupMatch } from '@/lib/blood-logic'
 import { playAlert } from '@/lib/audio'
 import type { usePatientSession } from '@/hooks/usePatientSession'
 import type { BloodBagData } from '@/types'
+import type { BloodBagOcr } from '@/lib/ocr'
 
 const ABO_GROUPS = ['A', 'B', 'O', 'AB'] as const
 const RH_OPTIONS = ['Positive', 'Negative'] as const
@@ -28,24 +28,26 @@ export function PatientStep({ session, nurse1Name }: Props) {
   const [orderedComponent, setOrderedComponent] = useState('')
   const [bagComponent, setBagComponent] = useState('')
   const [volumeMl, setVolumeMl] = useState('')
+  const [bagScanned, setBagScanned] = useState(false)
   const [scanError, setScanError] = useState<string | null>(null)
   const [formError, setFormError] = useState<string | null>(null)
   const [editingHN, setEditingHN] = useState(false)
   const [bgFail, setBgFail] = useState(false)
   const [bgFailReason, setBgFailReason] = useState('')
 
-  function handleChartScan(raw: string) {
+  function handleBagOcrResult(d: BloodBagOcr) {
     setScanError(null)
-    const parsed = parseBarcodeWristband(raw)
-    if (!parsed) { setScanError('ไม่พบ HN — กรุณาลองใหม่'); return }
-    setChartHN(parsed.wristbandId)
-    if (parsed.name) setPatientName(parsed.name)
-  }
-
-  function handleBagScan(raw: string) {
-    const id = raw.trim()
-    if (!id) return
-    setBagBarcode(id)
+    if (d.patientHN && d.patientHN !== chartHN) {
+      playAlert()
+      setScanError(`HN ไม่ตรง — ป้ายข้อมือ: ${chartHN} / บัตรถุงเลือด: ${d.patientHN}`)
+      return
+    }
+    if (d.bagId) setBagBarcode(d.bagId)
+    if (d.component) setBagComponent(d.component)
+    if (d.abo) setBagABO(d.abo)
+    if (d.rh) setBagRh(d.rh)
+    if (d.volumeMl) setVolumeMl(String(d.volumeMl))
+    setBagScanned(true)
   }
 
   async function handleConfirm() {
@@ -108,7 +110,7 @@ export function PatientStep({ session, nurse1Name }: Props) {
     setChartHN(''); setBagBarcode(''); setPatientName('')
     setPatABO(''); setPatRh(''); setBagABO(''); setBagRh('')
     setOrderedComponent(''); setBagComponent(''); setVolumeMl('')
-    setFormError(null); setScanError(null); setEditingHN(false)
+    setFormError(null); setScanError(null); setEditingHN(false); setBagScanned(false)
   }
 
   return (
@@ -127,12 +129,15 @@ export function PatientStep({ session, nurse1Name }: Props) {
 
       {!bgFail && !chartHN && (
         <div className="space-y-3">
-          <BarcodeScanner onScan={handleChartScan} label="Scan ชื่อผู้ป่วย หน้าOrder สั่งให้เลือด" />
+          <OcrScanner
+            mode="wristband"
+            onResult={(hn, name) => { setChartHN(hn); if (name) setPatientName(name); setScanError(null) }}
+          />
           {scanError && <AlertBanner type="warning" title={scanError} />}
         </div>
       )}
 
-      {!bgFail && chartHN && !bagBarcode && (
+      {!bgFail && chartHN && !bagScanned && (
         <div className="space-y-3">
           {editingHN ? (
             <div className="flex gap-2">
@@ -162,7 +167,7 @@ export function PatientStep({ session, nurse1Name }: Props) {
               onClick={() => { setChartHN(''); setPatientName(''); setScanError(null); setEditingHN(false) }}
               className="flex-1 border border-gray-200 text-xs text-gray-500 py-2 rounded hover:border-gray-400 transition-colors"
             >
-              Scan ใหม่
+              ถ่ายรูปใหม่
             </button>
             <button
               onClick={() => setEditingHN(true)}
@@ -171,11 +176,12 @@ export function PatientStep({ session, nurse1Name }: Props) {
               พิมพ์ HN เอง
             </button>
           </div>
-          <BarcodeScanner onScan={handleBagScan} label="Scan ถุงเลือด" />
+          <OcrScanner mode="bloodbag" onResult={handleBagOcrResult} />
+          {scanError && <AlertBanner type="danger" title={scanError} />}
         </div>
       )}
 
-      {!bgFail && chartHN && bagBarcode && (
+      {!bgFail && chartHN && bagScanned && (
         <div className="border border-primary rounded-lg overflow-hidden">
           <div className="bg-primary-light px-4 py-2 border-b border-primary">
             <span className="text-xs font-medium text-primary">ข้อมูลจากแบบบันทึกการให้โลหิต + ถุงเลือด</span>
@@ -187,16 +193,22 @@ export function PatientStep({ session, nurse1Name }: Props) {
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-sm font-semibold text-gray-900">{chartHN}</span>
                   <button
-                    onClick={() => { setChartHN(''); setPatientName(''); setBagBarcode(''); setScanError(null); setEditingHN(false) }}
+                    onClick={() => { setChartHN(''); setPatientName(''); setBagBarcode(''); setBagScanned(false); setScanError(null); setEditingHN(false) }}
                     className="text-xs text-primary underline"
                   >
-                    Scan ใหม่
+                    ถ่ายรูปใหม่
                   </button>
                 </div>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs font-medium text-gray-500">รหัสถุงเลือด</span>
-                <span className="font-mono text-sm font-semibold text-blood">{bagBarcode}</span>
+              <div>
+                <label className="text-xs font-medium text-blood block mb-1">รหัสถุงเลือด</label>
+                <input
+                  type="text"
+                  value={bagBarcode}
+                  onChange={e => { setBagBarcode(e.target.value); setFormError(null) }}
+                  placeholder="รหัสถุงเลือด"
+                  className="w-full border border-gray-200 rounded px-3 py-2 text-sm font-mono focus:outline-none focus:border-blood"
+                />
               </div>
             </div>
 

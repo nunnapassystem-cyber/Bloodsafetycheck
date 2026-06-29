@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import { StepIndicator } from '@/components/StepIndicator'
-import { BarcodeScanner } from '@/components/BarcodeScanner'
+import { OcrScanner } from '@/components/OcrScanner'
 import { BloodBagCard } from '@/components/BloodBagCard'
 import { PatientCard } from '@/components/PatientCard'
 import { AlertBanner } from '@/components/AlertBanner'
@@ -9,8 +9,8 @@ import { PatientStep } from '@/components/PatientStep'
 import { ConfirmStep } from '@/components/ConfirmStep'
 import { usePatientSession } from '@/hooks/usePatientSession'
 import { playAlert } from '@/lib/audio'
-import { parseBarcodeWristband } from '@/lib/barcode'
 import { createClient } from '@/lib/supabase/client'
+import type { BloodBagOcr } from '@/lib/ocr'
 import { useRouter } from 'next/navigation'
 
 export default function ScanPage() {
@@ -35,9 +35,8 @@ export default function ScanPage() {
     })
   }, [])
 
-  async function handleWristbandScan(raw: string) {
-    const parsed = parseBarcodeWristband(raw)
-    const scannedHN = parsed?.wristbandId ?? raw.trim()
+  async function handleWristbandScan(hn: string) {
+    const scannedHN = hn.trim()
     if (scannedHN !== session.patientData!.wristbandId) {
       playAlert()
       const reason = `HN ไม่ตรง: ชาร์ท ${session.patientData!.wristbandId} / ข้อมือ ${scannedHN}`
@@ -63,9 +62,9 @@ export default function ScanPage() {
     }
   }
 
-  async function handleBagRescan(raw: string) {
-    const scanned = raw.trim()
-    if (scanned !== session.bloodBag!.id) {
+  async function handleBagRescan(d: BloodBagOcr) {
+    const scanned = (d.bagId ?? '').trim()
+    if (!scanned || scanned !== session.bloodBag!.id) {
       playAlert()
       const reason = `ถุงเลือดไม่ตรง: บันทึก ${session.bloodBag!.id} / Scan ได้ ${scanned}`
       setStep2Fail(true)
@@ -126,14 +125,14 @@ export default function ScanPage() {
           )}
 
           {!step2Fail && !wristbandVerified && (
-            <BarcodeScanner onScan={handleWristbandScan} label="Scan ป้ายข้อมือผู้ป่วย" />
+            <OcrScanner mode="wristband" onResult={(hn) => handleWristbandScan(hn)} />
           )}
 
           {!step2Fail && wristbandVerified && (
             <div className="space-y-3">
               <AlertBanner type="success" title="✅ ผู้ป่วยถูกคน" />
               {session.bloodBag && <BloodBagCard bag={session.bloodBag} />}
-              <BarcodeScanner onScan={handleBagRescan} label="Scan ถุงเลือดอีกครั้ง" />
+              <OcrScanner mode="bloodbag" onResult={handleBagRescan} />
             </div>
           )}
         </div>
