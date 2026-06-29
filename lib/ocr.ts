@@ -13,14 +13,30 @@ export interface BloodBagOcr {
   volumeMl: number | null
 }
 
+// Wristband sticker format (same across the hospital):
+// Line 1: ชื่อ-สกุล  e.g. "พ.จ.อ. วัชระ พลอยงาม"
+// Line 2: หอผู้ป่วยXXX
+// Line 3: HN : 0108858   AN : A6907480   ← HN always 7 digits
+// Line 4: วันเกิด : DD/MM/YYYY อายุ: XX ปี
 export function parseWristband(text: string): WristbandOcr | null {
-  const hnMatch = text.match(/HN\s*[:：]\s*(\d{4,10})/i)
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean)
+
+  // HN patterns from most to least specific
+  const hnMatch =
+    text.match(/HN\s*[:：]\s*(\d{7})/i) ??         // exact: HN : 0108858
+    text.match(/H\s*N\s*[:：.]\s*(\d{7})/i) ??     // OCR noise: H N : 0108858
+    text.match(/HN\s*[:：]\s*(\d{4,10})/i) ??      // any digit count
+    text.match(/H\s*N\s*[:：.]\s*(\d{4,10})/i) ??  // loose + any count
+    text.match(/\b(0\d{6})\b/) ??                   // 7-digit starting with 0 (Thai HN pattern)
+    text.match(/\b(\d{7})\b/)                        // any 7-digit fallback
+
   if (!hnMatch) return null
   const hn = hnMatch[1]
-  const lines = text.split('\n').map(l => l.trim()).filter(Boolean)
+
+  // Name = first line that is not a ward/date/number line
   const nameLine = lines.find(l =>
     l.length > 3 &&
-    !l.match(/HN|AN|วันเกิด|หอผู้ป่วย|\d{2}\/\d{2}|\d{5,}/)
+    !l.match(/HN|AN|วันเกิด|หอผู้ป่วย|อายุ|\d{2}\/\d{2}\/\d{2}|\d{5,}/)
   )
   return { hn, name: nameLine ?? '' }
 }
