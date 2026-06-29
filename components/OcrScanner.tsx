@@ -18,47 +18,6 @@ const LABEL = {
   bloodbag:  'ถ่ายรูปบัตรคล้องถุงเลือด',
 }
 
-// ปรับภาพก่อน OCR: grayscale → Otsu binarization
-// Binarization (ขาว/ดำ) ช่วย Tesseract ได้ดีกว่า sharpen เพราะลด noise และ ambiguity
-function enhanceForOcr(canvas: HTMLCanvasElement): void {
-  const ctx = canvas.getContext('2d')!
-  const { width: w, height: h } = canvas
-  const imageData = ctx.getImageData(0, 0, w, h)
-  const data = imageData.data
-  const n = w * h
-
-  // 1. Convert to grayscale
-  const gray = new Uint8Array(n)
-  for (let i = 0, p = 0; p < n; i += 4, p++) {
-    gray[p] = Math.round(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2])
-  }
-
-  // 2. Otsu's threshold — หา threshold ที่แยก foreground/background ได้ดีที่สุด
-  const hist = new Array(256).fill(0)
-  for (let p = 0; p < n; p++) hist[gray[p]]++
-  let sum = 0
-  for (let i = 0; i < 256; i++) sum += i * hist[i]
-  let sumB = 0, wB = 0, max = 0, thresh = 128
-  for (let t = 0; t < 256; t++) {
-    wB += hist[t]
-    if (!wB) continue
-    const wF = n - wB
-    if (!wF) break
-    sumB += t * hist[t]
-    const mB = sumB / wB
-    const mF = (sum - sumB) / wF
-    const between = wB * wF * (mB - mF) ** 2
-    if (between > max) { max = between; thresh = t }
-  }
-
-  // 3. Binarize: ตัวอักษร → ดำ (0), พื้นหลัง → ขาว (255)
-  for (let i = 0, p = 0; p < n; i += 4, p++) {
-    const v = gray[p] >= thresh ? 255 : 0
-    data[i] = data[i + 1] = data[i + 2] = v
-    data[i + 3] = 255
-  }
-  ctx.putImageData(imageData, 0, 0)
-}
 
 function cropImageToBlob(
   src: string,
