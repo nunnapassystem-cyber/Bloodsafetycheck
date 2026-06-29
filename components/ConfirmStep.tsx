@@ -92,6 +92,8 @@ export function ConfirmStep({ session }: Props) {
   const [saving, setSaving] = useState(false)
   const [savedSummary, setSavedSummary] = useState<SavedSummary | null>(null)
   const [sharing, setSharing] = useState(false)
+  const [checks, setChecks] = useState({ wristband: false, informed: false, vitals: false })
+  const allChecked = checks.wristband && checks.informed && checks.vitals
 
   useEffect(() => {
     createClient().auth.getUser().then(({ data: { user } }) => {
@@ -267,10 +269,34 @@ export function ConfirmStep({ session }: Props) {
           />
         </div>
       </div>
+      <div className="border border-gray-200 rounded-lg p-3 space-y-2 bg-gray-50">
+        <p className="text-xs font-medium text-gray-500 mb-2">ยืนยันการเตรียมความพร้อมก่อนให้เลือด</p>
+        {([
+          { key: 'wristband', label: 'ใส่ป้ายข้อมือให้เลือดผู้ป่วยแล้ว' },
+          { key: 'informed',  label: 'แจ้งอาการผิดปกติที่ต้องเฝ้าระวัง (ผื่นคัน หายใจเหนื่อย) ให้เรียกพยาบาลแล้ว' },
+          { key: 'vitals',    label: 'เตรียมวัดสัญญาณชีพเป็นระยะตลอดการให้เลือด (ตามแนวทาง) แล้ว' },
+        ] as { key: keyof typeof checks; label: string }[]).map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setChecks(prev => ({ ...prev, [key]: !prev[key] }))}
+            className="w-full flex items-start gap-3 text-left"
+          >
+            <div className={`mt-0.5 w-5 h-5 flex-shrink-0 rounded border-2 flex items-center justify-center transition-colors ${
+              checks[key] ? 'bg-success border-success' : 'border-gray-300 bg-white'
+            }`}>
+              {checks[key] && <span className="text-white text-xs font-bold">✓</span>}
+            </div>
+            <span className={`text-sm leading-snug ${checks[key] ? 'text-success font-medium' : 'text-gray-700'}`}>
+              {label}
+            </span>
+          </button>
+        ))}
+      </div>
       {error && <AlertBanner type="danger" title={error} />}
       <button
         onClick={handleConfirm}
-        disabled={saving}
+        disabled={saving || !allChecked}
         className="w-full bg-success text-white text-sm font-semibold py-3 rounded disabled:opacity-50 transition-colors"
       >
         {saving ? 'กำลังบันทึก...' : 'ยืนยันเริ่มให้เลือด — บันทึกเวลา'}
