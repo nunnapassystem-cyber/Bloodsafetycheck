@@ -222,7 +222,7 @@ export function PatientStep({ session, nurse1Name }: Props) {
             ) : (
               <div className="border border-primary rounded-lg overflow-hidden">
                 <div className="bg-primary-light px-3 py-2 border-b border-primary flex justify-between items-center">
-                  <span className="text-xs font-medium text-primary">ผลจากสติ๊กเกอร์ข้อมือ</span>
+                  <span className="text-xs font-medium text-primary">ผลจากสติ๊กเกอร์ชื่อผู้ป่วย</span>
                   <button
                     onClick={() => { setWristbandOcr(null); setBloodBagOcr(null); setHnMismatch(false) }}
                     className="text-xs text-primary underline"

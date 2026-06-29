@@ -14,7 +14,7 @@ interface BloodBagProps {
 type Props = WristbandProps | BloodBagProps
 
 const LABEL = {
-  wristband: 'ถ่ายรูปสติ๊กเกอร์ข้อมือ',
+  wristband: 'ถ่ายรูปสติ๊กเกอร์ชื่อผู้ป่วย',
   bloodbag:  'ถ่ายรูปบัตรคล้องถุงเลือด',
 }
 
