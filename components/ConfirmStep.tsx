@@ -215,6 +215,13 @@ export function ConfirmStep({ session }: Props) {
           {sharing ? 'กำลังสร้างภาพ...' : 'บันทึกภาพ / แชร์ไป LINE'}
         </button>
 
+        <button
+          onClick={async () => { await createClient().auth.signOut(); router.push('/login') }}
+          className="w-full border border-gray-200 text-sm text-gray-500 py-2.5 rounded hover:border-gray-400 hover:text-gray-700 transition-colors"
+        >
+          ออกจากระบบ
+        </button>
+
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => { session.nextBag(); setSaved(false); setNurse2Name(''); setSavedSummary(null) }}
@@ -231,13 +238,6 @@ export function ConfirmStep({ session }: Props) {
             <span className="block text-xs font-normal opacity-70">(ล้างข้อมูลทั้งหมด)</span>
           </button>
         </div>
-
-        <button
-          onClick={async () => { await createClient().auth.signOut(); router.push('/login') }}
-          className="w-full border border-gray-200 text-sm text-gray-500 py-2.5 rounded hover:border-gray-400 hover:text-gray-700 transition-colors"
-        >
-          ออกจากระบบ
-        </button>
       </div>
     )
   }
