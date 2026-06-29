@@ -98,7 +98,11 @@ export function OcrScanner(props: Props) {
       })
       if (!res.ok) {
         const body = await res.json().catch(() => ({}))
-        setError(`OCR Error ${res.status}: ${body.error ?? 'unknown'}`)
+        if (res.status === 429) {
+          setError('OCR เกิน quota เดือนนี้ — กรุณากรอกข้อมูลเอง')
+        } else {
+          setError(`OCR Error ${res.status}: ${body.error ?? 'unknown'}`)
+        }
         return
       }
       const { text } = await res.json()
