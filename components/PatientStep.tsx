@@ -331,7 +331,7 @@ export function PatientStep({ session, nurse1Name }: Props) {
           {wristbandOcr && bloodBagOcr && showChecklist && !hnMismatch && (
             <div className="border border-warning rounded-lg overflow-hidden">
               <div className="bg-warning-light px-3 py-2 border-b border-warning">
-                <span className="text-xs font-medium text-warning">เตรียมความพร้อมก่อนไปขั้นตอนถัดไป</span>
+                <span className="text-xs font-medium text-warning">เตรียมความพร้อมก่อนไปให้เลือดผู้ป่วย</span>
               </div>
               <div className="divide-y divide-gray-100">
                 {/* row ป้ายมือ */}
