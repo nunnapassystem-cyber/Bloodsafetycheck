@@ -99,6 +99,7 @@ export function parseBloodBag(text: string): BloodBagOcr {
 export async function ocrImage(
   file: File,
   onProgress?: (pct: number) => void,
+  psm?: number,
 ): Promise<string> {
   const { createWorker } = await import('tesseract.js')
   const worker = await createWorker('tha+eng', 1, {
@@ -108,6 +109,9 @@ export async function ocrImage(
       }
     },
   })
+  if (psm !== undefined) {
+    await worker.setParameters({ tessedit_pageseg_mode: String(psm) as Parameters<typeof worker.setParameters>[0]['tessedit_pageseg_mode'] })
+  }
   const { data: { text } } = await worker.recognize(file)
   await worker.terminate()
   return text

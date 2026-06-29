@@ -18,7 +18,8 @@ const LABEL = {
   bloodbag:  'ถ่ายรูปบัตรคล้องถุงเลือด',
 }
 
-// ปรับภาพอัตโนมัติ: grayscale → auto-contrast → sharpen เพื่อช่วย OCR ในที่แสงน้อย
+// ปรับภาพก่อน OCR: grayscale → Otsu binarization
+// Binarization (ขาว/ดำ) ช่วย Tesseract ได้ดีกว่า sharpen เพราะลด noise และ ambiguity
 function enhanceForOcr(canvas: HTMLCanvasElement): void {
   const ctx = canvas.getContext('2d')!
   const { width: w, height: h } = canvas
@@ -26,44 +27,37 @@ function enhanceForOcr(canvas: HTMLCanvasElement): void {
   const data = imageData.data
   const n = w * h
 
-  // 1. Grayscale + หา range สำหรับ auto-contrast
+  // 1. Convert to grayscale
   const gray = new Uint8Array(n)
-  let lo = 255, hi = 0
   for (let i = 0, p = 0; p < n; i += 4, p++) {
-    const v = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]
-    gray[p] = v
-    if (v < lo) lo = v
-    if (v > hi) hi = v
+    gray[p] = Math.round(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2])
   }
 
-  // 2. Stretch contrast 0-255 (auto-brightness + contrast)
-  const range = hi - lo || 1
+  // 2. Otsu's threshold — หา threshold ที่แยก foreground/background ได้ดีที่สุด
+  const hist = new Array(256).fill(0)
+  for (let p = 0; p < n; p++) hist[gray[p]]++
+  let sum = 0
+  for (let i = 0; i < 256; i++) sum += i * hist[i]
+  let sumB = 0, wB = 0, max = 0, thresh = 128
+  for (let t = 0; t < 256; t++) {
+    wB += hist[t]
+    if (!wB) continue
+    const wF = n - wB
+    if (!wF) break
+    sumB += t * hist[t]
+    const mB = sumB / wB
+    const mF = (sum - sumB) / wF
+    const between = wB * wF * (mB - mF) ** 2
+    if (between > max) { max = between; thresh = t }
+  }
+
+  // 3. Binarize: ตัวอักษร → ดำ (0), พื้นหลัง → ขาว (255)
   for (let i = 0, p = 0; p < n; i += 4, p++) {
-    const v = Math.round((gray[p] - lo) / range * 255)
+    const v = gray[p] >= thresh ? 255 : 0
     data[i] = data[i + 1] = data[i + 2] = v
     data[i + 3] = 255
   }
   ctx.putImageData(imageData, 0, 0)
-
-  // 3. Sharpen ด้วย kernel [0,-1,0; -1,5,-1; 0,-1,0]
-  const src = ctx.getImageData(0, 0, w, h).data
-  const out = new Uint8ClampedArray(src.length)
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      const p = (y * w + x) * 4
-      if (x === 0 || x === w - 1 || y === 0 || y === h - 1) {
-        out[p] = out[p + 1] = out[p + 2] = src[p]; out[p + 3] = 255; continue
-      }
-      const c = src[p]
-      const t = src[((y - 1) * w + x) * 4]
-      const b = src[((y + 1) * w + x) * 4]
-      const l = src[(y * w + x - 1) * 4]
-      const r = src[(y * w + x + 1) * 4]
-      const v = Math.max(0, Math.min(255, 5 * c - t - b - l - r))
-      out[p] = out[p + 1] = out[p + 2] = v; out[p + 3] = 255
-    }
-  }
-  ctx.putImageData(new ImageData(out, w, h), 0, 0)
 }
 
 function cropImageToBlob(
@@ -130,7 +124,9 @@ export function OcrScanner(props: Props) {
         w: cropRight - cropLeft,
         h: cropBottom - cropTop,
       })
-      const text = await ocrImage(blob as File, setProgress)
+      // PSM 6 = single block of text — ดีกว่า default สำหรับบัตรที่มีโครงสร้างชัดเจน
+      const psm = props.mode === 'bloodbag' ? 6 : undefined
+      const text = await ocrImage(blob as File, setProgress, psm)
       setProgress(null)
       if (props.mode === 'wristband') {
         const result = parseWristband(text)
