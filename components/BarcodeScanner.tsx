@@ -32,14 +32,26 @@ export function BarcodeScanner({ onScan, label }: Props) {
     let cancelled = false
 
     async function init() {
-      const { Html5Qrcode } = await import('html5-qrcode')
+      const { Html5Qrcode, Html5QrcodeSupportedFormats } = await import('html5-qrcode')
       if (cancelled) return
       try {
-        const scanner = new Html5Qrcode(uid)
+        const scanner = new Html5Qrcode(uid, {
+          verbose: false,
+          formatsToSupport: [
+            Html5QrcodeSupportedFormats.CODE_128,
+            Html5QrcodeSupportedFormats.CODE_39,
+            Html5QrcodeSupportedFormats.EAN_13,
+            Html5QrcodeSupportedFormats.EAN_8,
+            Html5QrcodeSupportedFormats.QR_CODE,
+            Html5QrcodeSupportedFormats.PDF_417,
+            Html5QrcodeSupportedFormats.ITF,
+            Html5QrcodeSupportedFormats.DATA_MATRIX,
+          ],
+        })
         scannerRef.current = scanner
         await scanner.start(
           { facingMode: 'environment' },
-          { fps: 10, qrbox: { width: 260, height: 140 } },
+          { fps: 15, qrbox: { width: 300, height: 100 } },
           (text: string) => {
             if (!cancelled) { stopScan(); onScan(text) }
           },
