@@ -1,0 +1,41 @@
+import { NextResponse } from 'next/server'
+import { createServerClient } from '@/lib/supabase/server'
+
+const VISION_URL = `https://vision.googleapis.com/v1/images:annotate?key=${process.env.GOOGLE_CLOUD_VISION_API_KEY}`
+
+export async function POST(request: Request) {
+  const supabase = await createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const body = await request.json()
+  const { image } = body   // base64 string ไม่มี data: prefix
+  if (!image || typeof image !== 'string') {
+    return NextResponse.json({ error: 'No image provided' }, { status: 400 })
+  }
+
+  if (!process.env.GOOGLE_CLOUD_VISION_API_KEY) {
+    return NextResponse.json({ error: 'Vision API not configured' }, { status: 500 })
+  }
+
+  const visionRes = await fetch(VISION_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      requests: [{
+        image: { content: image },
+        features: [{ type: 'DOCUMENT_TEXT_DETECTION' }],
+      }],
+    }),
+  })
+
+  if (!visionRes.ok) {
+    const err = await visionRes.text()
+    console.error('Vision API error:', err)
+    return NextResponse.json({ error: 'Vision API failed' }, { status: 502 })
+  }
+
+  const visionData = await visionRes.json()
+  const text: string = visionData.responses?.[0]?.fullTextAnnotation?.text ?? ''
+  return NextResponse.json({ text })
+}

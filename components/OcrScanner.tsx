@@ -1,6 +1,6 @@
 'use client'
 import { useRef, useState } from 'react'
-import { ocrImage, parseWristband, parseBloodBag } from '@/lib/ocr'
+import { parseWristband, parseBloodBag } from '@/lib/ocr'
 import type { BloodBagOcr } from '@/lib/ocr'
 
 interface WristbandProps {
@@ -90,7 +90,7 @@ export function OcrScanner(props: Props) {
   const [cropBottom, setCropBottom]   = useState(0.55)
   const [cropLeft, setCropLeft]       = useState(0)
   const [cropRight, setCropRight]     = useState(1)
-  const [progress, setProgress]       = useState<number | null>(null)
+  const [loading, setLoading]         = useState(false)
   const [error, setError]             = useState<string | null>(null)
   const [rawText, setRawText]         = useState<string | null>(null)
   const [manualHN, setManualHN]       = useState('')
@@ -116,22 +116,35 @@ export function OcrScanner(props: Props) {
   async function handleCropConfirm() {
     if (!dataUrl) return
     setDataUrl(null)
-    setProgress(0)
+    setLoading(true)
     try {
+      // Crop only — Vision API ทำ preprocessing เองดีกว่า (ไม่เรียก enhanceForOcr)
       const blob = await cropImageToBlob(dataUrl, {
         x: cropLeft,
         y: cropTop,
         w: cropRight - cropLeft,
         h: cropBottom - cropTop,
       })
-      // PSM 6 = single block of text — ดีกว่า default สำหรับบัตรที่มีโครงสร้างชัดเจน
-      const psm = props.mode === 'bloodbag' ? 6 : undefined
-      const text = await ocrImage(blob as File, setProgress, psm)
-      setProgress(null)
+
+      // Convert blob → base64 แล้วส่ง server-side Vision API
+      const base64 = await new Promise<string>(resolve => {
+        const reader = new FileReader()
+        reader.onload = () => resolve((reader.result as string).split(',')[1])
+        reader.readAsDataURL(blob)
+      })
+
+      const res = await fetch('/api/ocr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: base64 }),
+      })
+      if (!res.ok) throw new Error('OCR API error')
+      const { text } = await res.json()
+      setRawText(text)
+
       if (props.mode === 'wristband') {
         const result = parseWristband(text)
         if (!result) {
-          setRawText(text)
           setError('ไม่พบข้อมูล HN — กรุณาถ่ายใหม่ หรือกรอก HN เอง')
           return
         }
@@ -140,8 +153,9 @@ export function OcrScanner(props: Props) {
         props.onResult(parseBloodBag(text))
       }
     } catch {
-      setProgress(null)
       setError('อ่านรูปไม่ได้ — กรุณาถ่ายใหม่')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -151,7 +165,7 @@ export function OcrScanner(props: Props) {
     setManualHN(''); setShowManual(false); setError(null); setRawText(null)
   }
 
-  const isProcessing = progress !== null
+  const isProcessing = loading
   const isCropping   = dataUrl !== null && !isProcessing
 
   return (
@@ -292,14 +306,9 @@ export function OcrScanner(props: Props) {
 
       {/* ── Processing ── */}
       {isProcessing && (
-        <div className="border border-primary rounded p-4 space-y-2">
-          <p className="text-xs font-medium text-primary text-center">กำลังอ่านข้อมูล... {progress}%</p>
-          <div className="w-full bg-gray-100 rounded-full h-2">
-            <div
-              className="bg-primary h-2 rounded-full transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
+        <div className="border border-primary rounded p-4 flex items-center justify-center gap-2">
+          <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs font-medium text-primary">กำลังวิเคราะห์ภาพ...</p>
         </div>
       )}
 
