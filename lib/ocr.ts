@@ -58,7 +58,16 @@ export function parseBloodBag(text: string): BloodBagOcr {
   const nameM = text.match(/(?:ชื่อ[^:：\n]{0,8}[:：]\s*)(.+)/)?.[1]?.trim() ?? null
 
   // ชนิดเลือด: LPRC, PRC, FFP, Platelet, WB
-  const comp = text.match(/\b(LPRC|PRC|FFP|Platelet|WB)\b/i)?.[1]?.toUpperCase() ?? null
+  // OCR อาจอ่าน "LPRC" เป็น "L PRC" (มี space) → จับทั้งสองแบบ แล้วลบ space
+  const compRaw =
+    text.match(/\bLPRC\b/i)?.[0] ??
+    text.match(/\bL\s+PRC\b/i)?.[0] ??
+    text.match(/\bFFP\b/i)?.[0] ??
+    text.match(/\bPlatelet\b/i)?.[0] ??
+    text.match(/\bWB\b/i)?.[0] ??
+    text.match(/\bPRC\b/i)?.[0] ??   // PRC อยู่หลังสุด ไม่งั้นจับก่อน LPRC
+    null
+  const comp = compRaw?.replace(/\s+/g, '').toUpperCase() ?? null
 
   // Gr. : A  — blood group ถุงเลือด (ในกล่องชนิดเลือด)
   // Fallback: หา "A Rh :" หรือ "AB Rh :" — blood group อยู่ก่อน Rh เสมอ
