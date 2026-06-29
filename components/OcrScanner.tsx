@@ -137,13 +137,15 @@ export function OcrScanner(props: Props) {
             ลากแถบรอบด้านให้ครอบเฉพาะข้อความ แล้วกด ตกลง
           </p>
 
+          {/* wrapper centers the crop box; inline-block makes container shrink-wrap to img */}
+          <div className="text-center">
           <div
             ref={containerRef}
-            className="relative select-none overflow-hidden rounded"
+            className="relative select-none overflow-hidden rounded inline-block"
             style={{ touchAction: 'none' }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={dataUrl} className="w-full block" alt="" />
+            <img src={dataUrl} style={{ maxHeight: '55vh', display: 'block', width: 'auto' }} alt="" />
 
             {/* ── Masks ── */}
             {/* บน */}
@@ -224,6 +226,7 @@ export function OcrScanner(props: Props) {
               <div className="h-10 w-2 bg-primary rounded-full opacity-90" />
             </div>
           </div>
+          </div>{/* end centering wrapper */}
 
           <div className="flex gap-2">
             <button
