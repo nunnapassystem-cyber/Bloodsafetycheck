@@ -39,5 +39,10 @@ export async function POST(request: Request) {
 
   const visionData = await visionRes.json()
   const text: string = visionData.responses?.[0]?.fullTextAnnotation?.text ?? ''
+
+  // Log scan for usage tracking (fire-and-forget)
+  const wardId = (user.user_metadata?.ward_id as string) ?? ''
+  supabase.from('ocr_scans').insert({ ward_id: wardId }).then(() => {})
+
   return NextResponse.json({ text })
 }

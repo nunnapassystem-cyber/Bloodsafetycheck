@@ -13,6 +13,7 @@ export default function AuditPage() {
   const [logs, setLogs] = useState<TransfusionLog[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [ocrCount, setOcrCount] = useState<number | null>(null)
 
   const fetchLogs = useCallback(async () => {
     setLoading(true)
@@ -31,6 +32,10 @@ export default function AuditPage() {
 
   useEffect(() => { fetchLogs() }, [fetchLogs])
 
+  useEffect(() => {
+    fetch('/api/ocr-stats').then(r => r.json()).then(d => setOcrCount(d.thisMonth ?? 0)).catch(() => {})
+  }, [])
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
@@ -43,6 +48,15 @@ export default function AuditPage() {
           Export Excel
         </button>
       </div>
+      {ocrCount !== null && (
+        <div className={`text-xs rounded px-3 py-2 mb-3 flex items-center justify-between ${ocrCount >= 900 ? 'bg-warning-light text-warning' : 'bg-gray-50 text-gray-500'}`}>
+          <span>OCR Scans เดือนนี้</span>
+          <span className="font-mono font-medium text-gray-900">
+            {ocrCount.toLocaleString()} / 1,000
+            {ocrCount >= 900 && ' ⚠️ ใกล้ถึงลิมิต'}
+          </span>
+        </div>
+      )}
       <FilterBar date={date} onDateChange={setDate} result={result} onResultChange={setResult} count={logs.length} />
       {loading
         ? <p className="text-sm text-gray-400 text-center py-8">กำลังโหลด...</p>
