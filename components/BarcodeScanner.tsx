@@ -20,17 +20,43 @@ export function BarcodeScanner({ onScan, label }: Props) {
     setError(null)
 
     const url = URL.createObjectURL(file)
-    const img = new Image()
-    img.src = url
-
     try {
-      await new Promise<void>((resolve, reject) => {
-        img.onload = () => resolve()
-        img.onerror = reject
+      const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const image = new Image()
+        image.onload = () => resolve(image)
+        image.onerror = reject
+        image.src = url
       })
-      const { BrowserMultiFormatReader } = await import('@zxing/browser')
-      const reader = new BrowserMultiFormatReader()
-      const result = await reader.decodeFromImageElement(img)
+
+      // Draw to canvas at capped size for performance
+      const maxDim = 1600
+      const scale = Math.min(1, maxDim / Math.max(img.naturalWidth || img.width, img.naturalHeight || img.height))
+      const canvas = document.createElement('canvas')
+      canvas.width = Math.round((img.naturalWidth || img.width) * scale)
+      canvas.height = Math.round((img.naturalHeight || img.height) * scale)
+      const ctx = canvas.getContext('2d')!
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+
+      const [{ BrowserMultiFormatReader }, { DecodeHintType, BarcodeFormat }] = await Promise.all([
+        import('@zxing/browser'),
+        import('@zxing/library'),
+      ])
+
+      const hints = new Map()
+      hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+        BarcodeFormat.CODE_128,
+        BarcodeFormat.CODE_39,
+        BarcodeFormat.EAN_13,
+        BarcodeFormat.EAN_8,
+        BarcodeFormat.QR_CODE,
+        BarcodeFormat.PDF_417,
+        BarcodeFormat.ITF,
+        BarcodeFormat.DATA_MATRIX,
+      ])
+      hints.set(DecodeHintType.TRY_HARDER, true)
+
+      const reader = new BrowserMultiFormatReader(hints)
+      const result = reader.decodeFromCanvas(canvas)
       onScan(result.getText())
     } catch {
       setError('ไม่พบ Barcode — กรุณาถ่ายใหม่ หรือกรอกรหัสด้วยมือ')
