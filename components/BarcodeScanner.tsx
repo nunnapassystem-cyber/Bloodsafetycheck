@@ -1,95 +1,62 @@
 'use client'
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useId, useCallback } from 'react'
 
 interface Props {
   onScan: (text: string) => void
   label: string
 }
 
-declare class BarcodeDetector {
-  constructor(options: { formats: string[] })
-  detect(source: HTMLVideoElement): Promise<Array<{ rawValue: string }>>
-}
-
-const BARCODE_FORMATS = ['code_128', 'code_39', 'ean_13', 'ean_8', 'qr_code', 'pdf417', 'itf', 'data_matrix', 'aztec']
-
 export function BarcodeScanner({ onScan, label }: Props) {
   const [scanning, setScanning] = useState(false)
-  const [countdown, setCountdown] = useState<number | null>(null)
   const [manual, setManual] = useState(false)
   const [manualInput, setManualInput] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const streamRef = useRef<MediaStream | null>(null)
-  const rafRef = useRef<number | null>(null)
-  const detectorRef = useRef<BarcodeDetector | null>(null)
-  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const scannerRef = useRef<any>(null)
+  const rawId = useId()
+  const uid = 'qr' + rawId.replace(/:/g, '')
 
-  const stopScan = useCallback(() => {
-    if (countdownRef.current) { clearInterval(countdownRef.current); countdownRef.current = null }
-    if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null }
-    if (streamRef.current) { streamRef.current.getTracks().forEach(t => t.stop()); streamRef.current = null }
-    if (videoRef.current) videoRef.current.srcObject = null
-    setCountdown(null)
+  const stopScan = useCallback(async () => {
+    if (scannerRef.current) {
+      try {
+        await scannerRef.current.stop()
+        scannerRef.current.clear()
+      } catch {}
+      scannerRef.current = null
+    }
     setScanning(false)
   }, [])
 
-  function scanLoop() {
-    async function detect() {
-      if (!videoRef.current || !streamRef.current || !detectorRef.current) return
-      if (videoRef.current.readyState >= 2) {
-        try {
-          const results = await detectorRef.current.detect(videoRef.current)
-          if (results.length > 0) {
-            stopScan()
-            onScan(results[0].rawValue)
-            return
-          }
-        } catch {}
-      }
-      rafRef.current = requestAnimationFrame(detect)
-    }
-    rafRef.current = requestAnimationFrame(detect)
-  }
+  useEffect(() => {
+    if (!scanning) return
+    let cancelled = false
 
-  async function startScan() {
-    setError(null)
-    if (!('BarcodeDetector' in window)) {
-      setError('เบราว์เซอร์นี้ไม่รองรับ auto-scan — กรุณากรอกรหัสด้วยมือ')
-      return
-    }
-    setScanning(true)
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }
-      })
-      streamRef.current = stream
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        await videoRef.current.play()
-      }
-      detectorRef.current = new BarcodeDetector({ formats: BARCODE_FORMATS })
-
-      setCountdown(3)
-      let n = 3
-      countdownRef.current = setInterval(() => {
-        n -= 1
-        if (n <= 0) {
-          clearInterval(countdownRef.current!)
-          countdownRef.current = null
-          setCountdown(null)
-          scanLoop()
-        } else {
-          setCountdown(n)
+    async function init() {
+      const { Html5Qrcode } = await import('html5-qrcode')
+      if (cancelled) return
+      try {
+        const scanner = new Html5Qrcode(uid)
+        scannerRef.current = scanner
+        await scanner.start(
+          { facingMode: 'environment' },
+          { fps: 10, qrbox: { width: 260, height: 140 } },
+          (text: string) => {
+            if (!cancelled) { stopScan(); onScan(text) }
+          },
+          undefined
+        )
+      } catch {
+        if (!cancelled) {
+          setScanning(false)
+          setError('ไม่สามารถเปิดกล้องได้ — กรุณากรอกรหัสด้วยมือ')
         }
-      }, 500)
-    } catch {
-      setScanning(false)
-      setError('ไม่สามารถเปิดกล้องได้ — กรุณากรอกรหัสด้วยมือ')
+      }
     }
-  }
 
-  useEffect(() => () => stopScan(), [stopScan])
+    init()
+    return () => { cancelled = true; stopScan() }
+  }, [scanning]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => () => { stopScan() }, [stopScan])
 
   function handleManualSubmit() {
     if (!manualInput.trim()) return
@@ -103,7 +70,7 @@ export function BarcodeScanner({ onScan, label }: Props) {
       {!scanning && !manual && (
         <div className="flex gap-2">
           <button
-            onClick={startScan}
+            onClick={() => { setError(null); setScanning(true) }}
             className="flex-1 bg-primary hover:bg-primary-dark text-white text-sm font-medium py-3 rounded transition-colors"
           >
             {label}
@@ -119,21 +86,7 @@ export function BarcodeScanner({ onScan, label }: Props) {
 
       {scanning && (
         <div className="space-y-2">
-          <div className="relative">
-            <video
-              ref={videoRef}
-              autoPlay
-              muted
-              playsInline
-              className="w-full rounded border border-gray-200"
-              style={{ maxHeight: 360 }}
-            />
-            {countdown !== null && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded">
-                <span className="text-white font-bold" style={{ fontSize: 96, lineHeight: 1 }}>{countdown}</span>
-              </div>
-            )}
-          </div>
+          <div id={uid} className="w-full rounded overflow-hidden" />
           <button
             onClick={stopScan}
             className="w-full border border-gray-200 text-sm text-gray-500 py-2 rounded hover:border-gray-400 transition-colors"
