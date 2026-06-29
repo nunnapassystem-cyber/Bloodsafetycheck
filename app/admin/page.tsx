@@ -245,6 +245,66 @@ export default function AdminPage() {
         {showUserMgmt && (
           <div className="border-t border-gray-200 p-4 space-y-5">
 
+            <div ref={createFormRef} className="space-y-3">
+              <p className="text-xs font-medium text-gray-500">เพิ่ม Nurse User ใหม่</p>
+              <div className="grid grid-cols-1 gap-3">
+                <div>
+                  <label className="text-xs text-gray-500 block mb-1">ชื่อพยาบาล</label>
+                  <input
+                    type="text"
+                    value={newNurseName}
+                    onChange={e => { setNewNurseName(e.target.value); setCreateError(null); setCreateSuccess(false) }}
+                    placeholder="เช่น นางสาวสมใจ รักดี"
+                    className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500 block mb-1">Ward</label>
+                  <select
+                    value={newWardId}
+                    onChange={e => { setNewWardId(e.target.value); setCreateError(null); setCreateSuccess(false) }}
+                    className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary"
+                  >
+                    <option value="">เลือก Ward...</option>
+                    {WARDS.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500 block mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={newEmail}
+                    onChange={e => { setNewEmail(e.target.value); setCreateError(null); setCreateSuccess(false) }}
+                    placeholder="nurse@hospital.com"
+                    className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500 block mb-1">Password เริ่มต้น</label>
+                  <input
+                    type="text"
+                    value={newPassword}
+                    onChange={e => { setNewPassword(e.target.value); setCreateError(null); setCreateSuccess(false) }}
+                    placeholder="เช่น Nurse1234"
+                    className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary"
+                  />
+                </div>
+              </div>
+              {createError && (
+                <p className="text-xs text-danger font-medium">{createError}</p>
+              )}
+              {createSuccess && (
+                <p className="text-xs text-success font-medium">✅ สร้าง User สำเร็จแล้ว</p>
+              )}
+              <button
+                onClick={handleCreateUser}
+                disabled={creating}
+                className="w-full bg-primary hover:bg-primary-dark disabled:opacity-50 text-white text-sm font-medium py-2 rounded transition-colors"
+              >
+                {creating ? 'กำลังสร้าง...' : 'สร้าง Nurse User'}
+              </button>
+            </div>
+
             {/* Ward Coverage */}
             {!nurseLoading && (
               <div className="space-y-2">
@@ -337,66 +397,6 @@ export default function AdminPage() {
                 })()}
               </div>
             )}
-
-            <div ref={createFormRef} className="space-y-3">
-              <p className="text-xs font-medium text-gray-500">เพิ่ม Nurse User ใหม่</p>
-              <div className="grid grid-cols-1 gap-3">
-                <div>
-                  <label className="text-xs text-gray-500 block mb-1">ชื่อพยาบาล</label>
-                  <input
-                    type="text"
-                    value={newNurseName}
-                    onChange={e => { setNewNurseName(e.target.value); setCreateError(null); setCreateSuccess(false) }}
-                    placeholder="เช่น นางสาวสมใจ รักดี"
-                    className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-gray-500 block mb-1">Ward</label>
-                  <select
-                    value={newWardId}
-                    onChange={e => { setNewWardId(e.target.value); setCreateError(null); setCreateSuccess(false) }}
-                    className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary"
-                  >
-                    <option value="">เลือก Ward...</option>
-                    {WARDS.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-xs text-gray-500 block mb-1">Email</label>
-                  <input
-                    type="email"
-                    value={newEmail}
-                    onChange={e => { setNewEmail(e.target.value); setCreateError(null); setCreateSuccess(false) }}
-                    placeholder="nurse@hospital.com"
-                    className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-gray-500 block mb-1">Password เริ่มต้น</label>
-                  <input
-                    type="text"
-                    value={newPassword}
-                    onChange={e => { setNewPassword(e.target.value); setCreateError(null); setCreateSuccess(false) }}
-                    placeholder="เช่น Nurse1234"
-                    className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary"
-                  />
-                </div>
-              </div>
-              {createError && (
-                <p className="text-xs text-danger font-medium">{createError}</p>
-              )}
-              {createSuccess && (
-                <p className="text-xs text-success font-medium">✅ สร้าง User สำเร็จแล้ว</p>
-              )}
-              <button
-                onClick={handleCreateUser}
-                disabled={creating}
-                className="w-full bg-primary hover:bg-primary-dark disabled:opacity-50 text-white text-sm font-medium py-2 rounded transition-colors"
-              >
-                {creating ? 'กำลังสร้าง...' : 'สร้าง Nurse User'}
-              </button>
-            </div>
 
             <div>
               <div className="flex items-center justify-between mb-2">
