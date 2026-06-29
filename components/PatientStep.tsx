@@ -72,7 +72,11 @@ function EditSelectRow({
 }
 
 export function PatientStep({ session, nurse1Name }: Props) {
-  const [wristbandOcr, setWristbandOcr] = useState<{ hn: string; name: string } | null>(null)
+  const [wristbandOcr, setWristbandOcr] = useState<{ hn: string; name: string } | null>(
+    session.patientData
+      ? { hn: session.patientData.wristbandId, name: session.patientData.name }
+      : null
+  )
   const [bloodBagOcr, setBloodBagOcr]   = useState<BloodBagOcr | null>(null)
 
   // chart fields (manual only)

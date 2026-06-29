@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { ConfirmationSummary } from '@/components/ConfirmationSummary'
 import { AlertBanner } from '@/components/AlertBanner'
@@ -81,6 +82,7 @@ function drawSummaryCanvas(s: SavedSummary): HTMLCanvasElement {
 }
 
 export function ConfirmStep({ session }: Props) {
+  const router = useRouter()
   const [nurse1Name, setNurse1Name] = useState('')
   const [nurse2Name, setNurse2Name] = useState('')
   const [wardName, setWardName] = useState('')
@@ -211,11 +213,28 @@ export function ConfirmStep({ session }: Props) {
           {sharing ? 'กำลังสร้างภาพ...' : 'บันทึกภาพ / แชร์ไป LINE'}
         </button>
 
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={() => { session.nextBag(); setSaved(false); setNurse2Name(''); setSavedSummary(null) }}
+            className="border border-primary text-primary text-sm font-medium py-3 rounded hover:bg-primary-light transition-colors"
+          >
+            ถุงเลือดถัดไป
+            <span className="block text-xs font-normal opacity-70">(ผู้ป่วยเดิม)</span>
+          </button>
+          <button
+            onClick={() => { session.clearSession(); setSaved(false); setNurse2Name(''); setSavedSummary(null) }}
+            className="bg-primary hover:bg-primary-dark text-white text-sm font-medium py-3 rounded transition-colors"
+          >
+            ผู้ป่วยรายต่อไป
+            <span className="block text-xs font-normal opacity-70">(ล้างข้อมูลทั้งหมด)</span>
+          </button>
+        </div>
+
         <button
-          onClick={() => { session.clearSession(); setSaved(false); setNurse2Name(''); setSavedSummary(null) }}
-          className="w-full bg-primary hover:bg-primary-dark text-white text-sm font-medium py-3 rounded transition-colors"
+          onClick={async () => { await createClient().auth.signOut(); router.push('/login') }}
+          className="w-full border border-gray-200 text-sm text-gray-500 py-2.5 rounded hover:border-gray-400 hover:text-gray-700 transition-colors"
         >
-          เริ่มผู้ป่วยรายต่อไป
+          ออกจากระบบ
         </button>
       </div>
     )
