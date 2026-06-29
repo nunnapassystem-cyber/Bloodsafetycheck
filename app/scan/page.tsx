@@ -28,6 +28,7 @@ export default function ScanPage() {
   const [wristbandVerified, setWristbandVerified] = useState(false)
   const [step2Fail, setStep2Fail] = useState(false)
   const [step2FailReason, setStep2FailReason] = useState('')
+  const [askedName, setAskedName] = useState(false)
 
   useEffect(() => {
     createClient().auth.getUser().then(({ data: { user } }) => {
@@ -94,6 +95,7 @@ export default function ScanPage() {
     setStep2Fail(false)
     setStep2FailReason('')
     setWristbandVerified(false)
+    setAskedName(false)
   }
 
   return (
@@ -125,7 +127,25 @@ export default function ScanPage() {
           )}
 
           {!step2Fail && !wristbandVerified && (
-            <OcrScanner mode="wristband" label="ถ่ายรูปสติ๊กเกอร์ชื่อผู้ป่วย (ป้ายข้อมือ)" onResult={(hn) => handleWristbandScan(hn)} />
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={() => setAskedName(prev => !prev)}
+                className="w-full flex items-start gap-3 text-left border border-gray-200 rounded-lg px-4 py-3 bg-gray-50"
+              >
+                <div className={`mt-0.5 w-5 h-5 flex-shrink-0 rounded border-2 flex items-center justify-center transition-colors ${
+                  askedName ? 'bg-success border-success' : 'border-gray-300 bg-white'
+                }`}>
+                  {askedName && <span className="text-white text-xs font-bold">✓</span>}
+                </div>
+                <span className={`text-sm leading-snug ${askedName ? 'text-success font-medium' : 'text-gray-700'}`}>
+                  สอบถามชื่อ-สกุลผู้ป่วยก่อนให้การพยาบาลแล้ว
+                </span>
+              </button>
+              {askedName && (
+                <OcrScanner mode="wristband" label="ถ่ายรูปสติ๊กเกอร์ชื่อผู้ป่วย (ป้ายข้อมือ)" onResult={(hn) => handleWristbandScan(hn)} />
+              )}
+            </div>
           )}
 
           {!step2Fail && wristbandVerified && (
