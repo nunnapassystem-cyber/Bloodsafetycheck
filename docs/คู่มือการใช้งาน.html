@@ -12,11 +12,12 @@
   body {
     font-family: 'Sarabun', 'Helvetica Neue', Arial, sans-serif;
     font-size: 13px;
-    line-height: 1.7;
+    line-height: 1.75;
     color: #1f2937;
     background: #fff;
   }
 
+  /* COVER */
   .cover {
     page-break-after: always;
     display: flex;
@@ -29,35 +30,17 @@
     text-align: center;
     padding: 60px 40px;
   }
-
   .cover .logo-ring {
     width: 90px; height: 90px;
     border: 4px solid rgba(255,255,255,0.6);
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     margin-bottom: 32px;
-    font-size: 36px;
+    font-size: 38px;
   }
-
-  .cover h1 {
-    font-size: 26px;
-    font-weight: 700;
-    margin-bottom: 12px;
-    letter-spacing: 0.3px;
-  }
-
-  .cover h2 {
-    font-size: 16px;
-    font-weight: 400;
-    opacity: 0.85;
-    margin-bottom: 48px;
-  }
-
-  .cover .badge-row {
-    display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
-    margin-bottom: 60px;
-  }
-
+  .cover h1 { font-size: 26px; font-weight: 700; margin-bottom: 10px; }
+  .cover h2 { font-size: 15px; font-weight: 400; opacity: 0.8; margin-bottom: 48px; }
+  .cover .badge-row { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; margin-bottom: 60px; }
   .cover .badge {
     background: rgba(255,255,255,0.18);
     border: 1px solid rgba(255,255,255,0.35);
@@ -66,291 +49,134 @@
     font-size: 12px;
     font-weight: 500;
   }
-
-  .cover .version {
-    font-size: 11px;
-    opacity: 0.6;
-    margin-top: auto;
-  }
+  .cover .version { font-size: 11px; opacity: 0.6; }
 
   /* TOC */
-  .toc-page {
-    page-break-after: always;
-    padding: 60px 64px;
-  }
+  .toc-page { page-break-after: always; padding: 60px 64px; }
+  .toc-title { font-size: 20px; font-weight: 700; color: #185FA5; border-bottom: 2px solid #185FA5; padding-bottom: 10px; margin-bottom: 28px; }
+  .toc-section { margin-bottom: 26px; }
+  .toc-section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #6b7280; margin-bottom: 10px; }
+  .toc-item { display: flex; align-items: baseline; padding: 5px 0; font-size: 13px; color: #374151; }
+  .toc-item .dots { flex: 1; border-bottom: 1px dotted #d1d5db; margin: 0 8px; position: relative; top: -2px; }
+  .toc-item .num { font-weight: 600; color: #185FA5; min-width: 22px; margin-right: 6px; }
 
-  .toc-title {
-    font-size: 20px;
-    font-weight: 700;
-    color: #185FA5;
-    border-bottom: 2px solid #185FA5;
-    padding-bottom: 10px;
-    margin-bottom: 28px;
-  }
+  /* Pages */
+  .page { padding: 48px 64px; }
+  .section-divider { page-break-before: always; }
 
-  .toc-section {
-    margin-bottom: 24px;
-  }
-
-  .toc-section-label {
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #6b7280;
-    margin-bottom: 10px;
-  }
-
-  .toc-item {
-    display: flex;
-    align-items: baseline;
-    padding: 5px 0;
-    font-size: 13px;
-    color: #374151;
-  }
-
-  .toc-item .dots {
-    flex: 1;
-    border-bottom: 1px dotted #d1d5db;
-    margin: 0 8px;
-    position: relative;
-    top: -2px;
-  }
-
-  .toc-item .num {
-    font-weight: 600;
-    color: #185FA5;
-    min-width: 20px;
-    margin-right: 8px;
-  }
-
-  /* Content pages */
-  .page {
-    padding: 48px 64px;
-  }
-
-  .section-divider {
-    page-break-before: always;
-  }
-
-  /* Section header banner */
+  /* Section banner */
   .section-banner {
-    background: linear-gradient(135deg, #185FA5, #0C447C);
-    color: white;
     border-radius: 10px;
-    padding: 20px 28px;
+    padding: 22px 28px;
     margin-bottom: 32px;
+    color: white;
   }
+  .section-banner .section-num { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; opacity: 0.7; margin-bottom: 4px; }
+  .section-banner h2 { font-size: 20px; font-weight: 700; }
+  .section-banner p { font-size: 12px; opacity: 0.8; margin-top: 4px; margin-bottom: 0; }
 
-  .section-banner .section-num {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    opacity: 0.75;
-    margin-bottom: 4px;
-  }
-
-  .section-banner h2 {
-    font-size: 20px;
-    font-weight: 700;
-  }
-
-  .section-banner p {
-    font-size: 12px;
-    opacity: 0.8;
-    margin-top: 4px;
-  }
-
-  /* Step cards */
-  .step-card {
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    overflow: hidden;
-  }
-
-  .step-header {
-    background: #f3f4f6;
-    padding: 12px 20px;
+  /* Step flow */
+  .flow-row {
     display: flex;
     align-items: center;
-    gap: 12px;
-    border-bottom: 1px solid #e5e7eb;
+    gap: 0;
+    margin: 16px 0 24px;
+    justify-content: center;
   }
+  .flow-box {
+    background: #f0f7ff;
+    border: 2px solid #185FA5;
+    border-radius: 10px;
+    padding: 12px 20px;
+    text-align: center;
+    flex: 1;
+  }
+  .flow-box .fb-num { font-size: 10px; font-weight: 700; color: #185FA5; text-transform: uppercase; letter-spacing: 1px; }
+  .flow-box .fb-title { font-size: 13px; font-weight: 600; color: #111827; }
+  .flow-arrow { font-size: 20px; color: #185FA5; padding: 0 8px; flex-shrink: 0; }
 
-  .step-num {
-    background: #185FA5;
-    color: white;
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px;
-    font-weight: 700;
-    flex-shrink: 0;
-  }
+  /* Step card */
+  .step-card { border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 18px; overflow: hidden; }
+  .step-header { background: #f3f4f6; padding: 11px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #e5e7eb; }
+  .step-num { background: #185FA5; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+  .step-title { font-size: 14px; font-weight: 600; color: #111827; }
+  .step-body { padding: 16px 20px; }
+  .step-body ol, .step-body ul { padding-left: 18px; }
+  .step-body li { margin-bottom: 5px; color: #374151; }
 
-  .step-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: #111827;
-  }
-
-  .step-body {
-    padding: 16px 20px;
-  }
-
-  .step-body ol, .step-body ul {
-    padding-left: 18px;
-  }
-
-  .step-body li {
-    margin-bottom: 6px;
-    color: #374151;
-  }
+  /* Sub-step card (ก-ง) */
+  .sub-card { border: 1px solid #dbeafe; border-radius: 8px; margin-bottom: 14px; overflow: hidden; }
+  .sub-header { background: #eff6ff; padding: 8px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #dbeafe; }
+  .sub-badge { background: #185FA5; color: white; border-radius: 6px; padding: 2px 10px; font-size: 11px; font-weight: 700; }
+  .sub-title { font-size: 13px; font-weight: 600; color: #1e40af; }
+  .sub-body { padding: 12px 16px; }
+  .sub-body ol, .sub-body ul { padding-left: 16px; }
+  .sub-body li { margin-bottom: 4px; color: #374151; font-size: 12px; }
 
   /* Alert boxes */
-  .alert {
-    border-radius: 8px;
-    padding: 12px 16px;
-    margin: 14px 0;
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-  }
-
-  .alert-danger {
-    background: #FADBD8;
-    border-left: 4px solid #A32D2D;
-    color: #7B1F1F;
-  }
-
-  .alert-success {
-    background: #D5F0E3;
-    border-left: 4px solid #1A7A4A;
-    color: #145C38;
-  }
-
-  .alert-warning {
-    background: #FDF3DC;
-    border-left: 4px solid #B7770D;
-    color: #8A5A09;
-  }
-
-  .alert-info {
-    background: #D6E8FA;
-    border-left: 4px solid #185FA5;
-    color: #0C447C;
-  }
-
-  .alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .alert { border-radius: 8px; padding: 11px 16px; margin: 12px 0; display: flex; gap: 10px; align-items: flex-start; }
+  .alert-danger  { background: #FADBD8; border-left: 4px solid #A32D2D; color: #7B1F1F; }
+  .alert-success { background: #D5F0E3; border-left: 4px solid #1A7A4A; color: #145C38; }
+  .alert-warning { background: #FDF3DC; border-left: 4px solid #B7770D; color: #8A5A09; }
+  .alert-info    { background: #D6E8FA; border-left: 4px solid #185FA5; color: #0C447C; }
+  .alert-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
   .alert-title { font-weight: 600; font-size: 12px; margin-bottom: 2px; }
   .alert p { font-size: 12px; margin: 0; }
 
   /* Tables */
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 14px 0;
-    font-size: 12px;
-  }
-
-  th {
-    background: #185FA5;
-    color: white;
-    padding: 9px 12px;
-    text-align: left;
-    font-weight: 600;
-  }
-
-  td {
-    padding: 8px 12px;
-    border-bottom: 1px solid #e5e7eb;
-    color: #374151;
-  }
-
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 12px; }
+  th { background: #185FA5; color: white; padding: 9px 12px; text-align: left; font-weight: 600; }
+  td { padding: 8px 12px; border-bottom: 1px solid #e5e7eb; color: #374151; }
   tr:nth-child(even) td { background: #f9fafb; }
 
-  /* Code block */
-  .code-block {
-    background: #1f2937;
-    color: #e5e7eb;
-    border-radius: 8px;
-    padding: 14px 18px;
-    font-family: 'Courier New', monospace;
-    font-size: 11px;
-    line-height: 1.8;
-    margin: 12px 0;
-    white-space: pre;
-    overflow: hidden;
-  }
+  /* Ward table */
+  .ward-table th { background: #374151; }
+  .ward-table td:first-child { font-family: monospace; font-size: 11px; color: #185FA5; font-weight: 700; }
 
-  /* Subsection headings */
-  h3 {
-    font-size: 15px;
-    font-weight: 700;
-    color: #185FA5;
-    margin: 24px 0 12px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid #dbeafe;
-  }
-
-  h4 {
-    font-size: 13px;
-    font-weight: 600;
-    color: #374151;
-    margin: 16px 0 8px;
-  }
-
+  /* Headings */
+  h3 { font-size: 15px; font-weight: 700; color: #185FA5; margin: 24px 0 12px; padding-bottom: 6px; border-bottom: 1px solid #dbeafe; }
+  h4 { font-size: 13px; font-weight: 600; color: #374151; margin: 14px 0 8px; }
   p { margin-bottom: 10px; color: #374151; }
 
-  /* Ward table compact */
-  .ward-table th { background: #374151; }
-  .ward-table td:first-child { font-family: monospace; font-size: 11px; color: #185FA5; font-weight: 600; }
+  /* Two-column */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 12px 0; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 12px 0; }
+
+  /* Mini card */
+  .mini-card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px 16px; }
+  .mini-card .mini-title { font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .mini-card ul { padding-left: 14px; }
+  .mini-card li { font-size: 12px; color: #374151; margin-bottom: 4px; }
+
+  /* Highlight box */
+  .highlight-box { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 14px 18px; margin: 12px 0; }
+
+  /* Code block */
+  .code-block { background: #1f2937; color: #e5e7eb; border-radius: 8px; padding: 14px 18px; font-family: 'Courier New', monospace; font-size: 11px; line-height: 1.8; margin: 12px 0; white-space: pre; }
+
+  /* Toggle illustration */
+  .toggle-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-size: 12px; }
+  .toggle-on { display: inline-flex; align-items: center; width: 36px; height: 20px; background: #185FA5; border-radius: 10px; position: relative; flex-shrink: 0; }
+  .toggle-on::after { content: ''; position: absolute; right: 3px; width: 14px; height: 14px; background: white; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+  .toggle-off { display: inline-flex; align-items: center; width: 36px; height: 20px; background: #d1d5db; border-radius: 10px; position: relative; flex-shrink: 0; }
+  .toggle-off::after { content: ''; position: absolute; left: 3px; width: 14px; height: 14px; background: white; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
 
   /* Footer */
-  .footer {
-    margin-top: 48px;
-    padding-top: 16px;
-    border-top: 1px solid #e5e7eb;
-    font-size: 10px;
-    color: #9ca3af;
-    text-align: center;
-  }
+  .footer { margin-top: 48px; padding-top: 14px; border-top: 1px solid #e5e7eb; font-size: 10px; color: #9ca3af; text-align: center; }
 
-  /* Print */
+  /* OCR quota bar */
+  .quota-bar { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; margin: 10px 0; font-size: 12px; }
+  .quota-bar .qb-label { color: #6b7280; }
+  .quota-bar .qb-value { font-family: monospace; font-weight: 600; color: #111827; }
+  .quota-bar-warn { background: #FDF3DC; border-color: #B7770D; }
+  .quota-bar-warn .qb-label { color: #8A5A09; }
+
   @media print {
     .section-divider { page-break-before: always; }
     .no-break { page-break-inside: avoid; }
   }
 
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0; }
-
-  .mini-card {
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 14px 16px;
-  }
-
-  .mini-card .mini-title {
-    font-size: 11px;
-    font-weight: 700;
-    color: #6b7280;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 8px;
-  }
-
-  .mini-card ul { padding-left: 14px; }
-  .mini-card li { font-size: 12px; color: #374151; margin-bottom: 4px; }
-
-  .highlight-box {
-    background: #f0f9ff;
-    border: 1px solid #bae6fd;
-    border-radius: 8px;
-    padding: 14px 18px;
-    margin: 14px 0;
-  }
+  .no-break { page-break-inside: avoid; }
 </style>
 </head>
 <body>
@@ -364,7 +190,7 @@
     <div class="badge">คู่มือพยาบาล (User)</div>
     <div class="badge">คู่มือผู้ดูแลระบบ (Admin)</div>
   </div>
-  <div class="version">เวอร์ชัน 1.0 &nbsp;·&nbsp; มิถุนายน 2569 &nbsp;·&nbsp; โรงพยาบาล SRK</div>
+  <div class="version">เวอร์ชัน 2.0 &nbsp;·&nbsp; มิถุนายน 2569 &nbsp;·&nbsp; โรงพยาบาล SRK</div>
 </div>
 
 <!-- ===== TOC ===== -->
@@ -374,28 +200,48 @@
   <div class="toc-section">
     <div class="toc-section-label">ส่วนที่ 1 — พยาบาล (User)</div>
     <div class="toc-item"><span class="num">1.</span> การเข้าสู่ระบบ <span class="dots"></span> 3</div>
-    <div class="toc-item"><span class="num">2.</span> ขั้นตอนที่ 1 — Scan และระบุข้อมูลผู้ป่วย + ถุงเลือด <span class="dots"></span> 3</div>
-    <div class="toc-item"><span class="num">3.</span> ผลการตรวจสอบ (PASS / FAIL) <span class="dots"></span> 4</div>
-    <div class="toc-item"><span class="num">4.</span> ขั้นตอนที่ 2 — ยืนยันด้วยพยาบาล 2 คน <span class="dots"></span> 4</div>
-    <div class="toc-item"><span class="num">5.</span> ขั้นตอนที่ 3 — หน้าสรุปสำเร็จ / แชร์ LINE <span class="dots"></span> 5</div>
-    <div class="toc-item"><span class="num">6.</span> Session Timeout และการออกจากระบบ <span class="dots"></span> 5</div>
+    <div class="toc-item"><span class="num">2.</span> ขั้นตอนที่ 1 — ตรวจ Order + ถุงเลือด (ก–ง) <span class="dots"></span> 3</div>
+    <div class="toc-item"><span class="num">3.</span> ผลการตรวจสอบ Blood Group (PASS / FAIL) <span class="dots"></span> 4</div>
+    <div class="toc-item"><span class="num">4.</span> ขั้นตอนที่ 2 — ยืนยันด้วยพยาบาล 2 คน <span class="dots"></span> 5</div>
+    <div class="toc-item"><span class="num">5.</span> ขั้นตอนที่ 3 — บันทึกสำเร็จ / แชร์ LINE <span class="dots"></span> 5</div>
+    <div class="toc-item"><span class="num">6.</span> Session Timeout &amp; เคล็ดลับ OCR <span class="dots"></span> 5</div>
   </div>
 
   <div class="toc-section">
     <div class="toc-section-label">ส่วนที่ 2 — ผู้ดูแลระบบ (Admin)</div>
     <div class="toc-item"><span class="num">7.</span> การเข้าสู่ระบบ Admin <span class="dots"></span> 6</div>
-    <div class="toc-item"><span class="num">8.</span> การดู Audit Log <span class="dots"></span> 6</div>
-    <div class="toc-item"><span class="num">9.</span> การจัดการผู้ใช้งาน <span class="dots"></span> 7</div>
-    <div class="toc-item"><span class="num">10.</span> นโยบายข้อมูลและความปลอดภัย <span class="dots"></span> 8</div>
+    <div class="toc-item"><span class="num">8.</span> การดู Audit Log &amp; OCR Quota <span class="dots"></span> 6</div>
+    <div class="toc-item"><span class="num">9.</span> เพิ่ม Nurse User ใหม่ <span class="dots"></span> 7</div>
+    <div class="toc-item"><span class="num">10.</span> เปิด/ปิด Ward ที่แสดงในหน้า Login <span class="dots"></span> 7</div>
+    <div class="toc-item"><span class="num">11.</span> แก้ไข / ลบ Nurse User <span class="dots"></span> 8</div>
+    <div class="toc-item"><span class="num">12.</span> นโยบายข้อมูล (PDPA) <span class="dots"></span> 8</div>
   </div>
 </div>
 
 <!-- ===== SECTION 1: USER ===== -->
 <div class="page section-divider">
-  <div class="section-banner">
+  <div class="section-banner" style="background: linear-gradient(135deg, #185FA5, #0C447C);">
     <div class="section-num">ส่วนที่ 1</div>
     <h2>คู่มือสำหรับพยาบาล (User)</h2>
     <p>ขั้นตอนการใช้งานระบบตรวจสอบความปลอดภัยก่อนให้เลือดผู้ป่วย</p>
+  </div>
+
+  <!-- FLOW -->
+  <div class="flow-row no-break">
+    <div class="flow-box">
+      <div class="fb-num">ขั้นตอนที่ 1</div>
+      <div class="fb-title">ตรวจ Order + ถุงเลือด</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">
+      <div class="fb-num">ขั้นตอนที่ 2</div>
+      <div class="fb-title">ยืนยัน 2 พยาบาล</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">
+      <div class="fb-num">ขั้นตอนที่ 3</div>
+      <div class="fb-title">บันทึกสำเร็จ</div>
+    </div>
   </div>
 
   <!-- LOGIN -->
@@ -404,90 +250,113 @@
     <div class="step-body">
       <ol>
         <li>เปิด Browser บนมือถือหรือ Tablet → ไปที่ URL ของระบบ</li>
-        <li>กรอก <strong>Email</strong> และ <strong>Password</strong> ที่ได้รับจาก Admin</li>
+        <li>เลือก <strong>Ward</strong> ของท่านจากรายการ (แสดงเฉพาะ Ward ที่ Admin เปิดใช้งาน)</li>
+        <li>เลือก <strong>ชื่อพยาบาล</strong> ของท่าน</li>
+        <li>กรอก <strong>Password</strong> ที่ได้รับจากผู้ดูแลระบบ</li>
         <li>กด <strong>"เข้าสู่ระบบ"</strong></li>
-        <li>หน้าหลักจะแสดง <strong>ชื่อพยาบาล</strong> และ <strong>Ward</strong> ของท่านที่มุมบนขวา</li>
       </ol>
-      <div class="alert alert-info">
+      <div class="alert alert-info" style="margin-top:10px;">
         <div class="alert-icon">ℹ️</div>
-        <div><div class="alert-title">ลืมรหัสผ่าน</div><p>ติดต่อผู้ดูแลระบบ (Admin) เพื่อ Reset รหัสผ่าน</p></div>
+        <div><div class="alert-title">ลืมรหัสผ่าน</div><p>กด "เปลี่ยนรหัสผ่าน" บนหน้าหลัก หรือติดต่อ Admin เพื่อ Reset</p></div>
       </div>
     </div>
   </div>
 
   <!-- STEP 1 -->
-  <h3>2. ขั้นตอนที่ 1 — Scan และระบุข้อมูล</h3>
+  <h3>2. ขั้นตอนที่ 1 — ตรวจ Order + ถุงเลือด</h3>
+  <p style="font-size:12px; color:#6b7280; margin-bottom:12px;">มี 4 หัวข้อย่อย (ก–ง) ทำตามลำดับทุกครั้ง</p>
 
-  <div class="step-card no-break">
-    <div class="step-header">
-      <div class="step-num">1</div>
-      <div class="step-title">Scan สติ๊กเกอร์ผู้ป่วย (จากแบบบันทึกการให้โลหิต)</div>
+  <div class="sub-card no-break">
+    <div class="sub-header">
+      <span class="sub-badge">ก</span>
+      <span class="sub-title">ถ่ายรูปสติ๊กเกอร์ข้อมือ</span>
     </div>
-    <div class="step-body">
+    <div class="sub-body">
       <ol>
-        <li>กดปุ่ม <strong>"Scan ชื่อผู้ป่วย หน้า Order สั่งให้เลือด"</strong></li>
-        <li>ให้กล้องจับ Barcode/QR Code บนแบบบันทึกการให้โลหิต</li>
-        <li>ระบบอ่าน HN อัตโนมัติ</li>
+        <li>กด <strong>"ถ่ายรูปสติ๊กเกอร์ข้อมือ"</strong> → กล้องเปิด</li>
+        <li>ถ่ายรูปสติ๊กเกอร์ที่ข้อมือผู้ป่วย</li>
+        <li>ปรับกรอบตัดให้ครอบข้อความ → กด <strong>"ตกลง อ่านข้อความ"</strong></li>
+        <li>ระบบอ่าน HN และชื่อผู้ป่วยอัตโนมัติ — แสดงในกล่องสีน้ำเงิน</li>
+        <li>แก้ไขได้โดยตรงถ้า OCR อ่านผิด</li>
       </ol>
-      <div class="alert alert-warning">
+      <div class="alert alert-warning" style="margin-top:8px;">
         <div class="alert-icon">⚠️</div>
-        <div><div class="alert-title">กรณี Scan ไม่ได้</div>
-        <p>กด <strong>"Scan ใหม่"</strong> เพื่อลองอีกครั้ง หรือกด <strong>"พิมพ์ HN เอง"</strong> → กรอก HN ด้วยมือ → กด <strong>ยืนยัน</strong></p></div>
+        <div><div class="alert-title">OCR อ่านไม่ได้</div><p>กด <strong>"กรอก HN เอง"</strong> → พิมพ์ HN → กด <strong>"ยืนยัน HN"</strong></p></div>
       </div>
     </div>
   </div>
 
-  <div class="step-card no-break">
-    <div class="step-header">
-      <div class="step-num">2</div>
-      <div class="step-title">Scan ถุงเลือด</div>
+  <div class="sub-card no-break">
+    <div class="sub-header">
+      <span class="sub-badge">ข</span>
+      <span class="sub-title">กรอกข้อมูลจากแบบบันทึกการให้โลหิต</span>
     </div>
-    <div class="step-body">
-      <ol>
-        <li>หลังได้ HN แล้ว → กดปุ่ม <strong>"Scan ถุงเลือด"</strong></li>
-        <li>ให้กล้องจับ Barcode บนถุงเลือด</li>
-        <li>ระบบบันทึกรหัสถุงเลือดอัตโนมัติ</li>
-      </ol>
+    <div class="sub-body">
+      <table style="margin:0;">
+        <tr><th>ช่อง</th><th>อ่านจาก</th></tr>
+        <tr><td>Blood Group ผู้ป่วย (ABO)</td><td>แบบบันทึกการให้โลหิต</td></tr>
+        <tr><td>Rh ผู้ป่วย (Positive/Negative)</td><td>แบบบันทึกการให้โลหิต</td></tr>
+        <tr><td>ชนิดเลือดที่สั่ง (Order แพทย์)</td><td>แบบบันทึกการให้โลหิต</td></tr>
+      </table>
+      <p style="font-size:12px; margin-top:8px; margin-bottom:0;">ระบบแสดง Blood Group สรุป เช่น <strong>A+</strong> หรือ <strong>O-</strong> หลังเลือกครบ</p>
     </div>
   </div>
 
-  <div class="step-card no-break">
-    <div class="step-header">
-      <div class="step-num">3</div>
-      <div class="step-title">กรอกข้อมูลตรวจสอบ</div>
+  <div class="sub-card no-break">
+    <div class="sub-header">
+      <span class="sub-badge">ค</span>
+      <span class="sub-title">ถ่ายรูปบัตรคล้องถุงเลือด</span>
     </div>
-    <div class="step-body">
-      <p>กรอกข้อมูลให้ครบทุกช่อง:</p>
-      <table>
-        <tr><th>ช่องข้อมูล</th><th>อ่านจาก</th></tr>
-        <tr><td>ชื่อ-สกุล ผู้ป่วย</td><td>แบบบันทึกการให้โลหิต</td></tr>
-        <tr><td>Blood Group ผู้ป่วย (ABO + Rh)</td><td>แบบบันทึกการให้โลหิต</td></tr>
-        <tr><td>ชนิดเลือดที่สั่ง (Order แพทย์)</td><td>แบบบันทึกการให้โลหิต</td></tr>
-        <tr><td>Blood Group ถุงเลือด (ABO + Rh)</td><td>ป้ายถุงเลือด</td></tr>
-        <tr><td>ชนิดเลือดในถุง</td><td>ป้ายถุงเลือด</td></tr>
-        <tr><td>ปริมาณ (ml)</td><td>ป้ายถุงเลือด</td></tr>
+    <div class="sub-body">
+      <ol>
+        <li>กด <strong>"ถ่ายรูปบัตรคล้องถุงเลือด"</strong> → ถ่ายบัตรสีขาวที่คล้องถุงเลือด</li>
+        <li>ปรับกรอบตัดให้ครอบข้อความ → กด <strong>"ตกลง อ่านข้อความ"</strong></li>
+        <li>ระบบอ่านข้อมูลถุงเลือดอัตโนมัติ (แก้ไขได้ทุกช่อง):</li>
+      </ol>
+      <ul style="margin-top:6px;">
+        <li>ชื่อ/สกุล และ HN บนถุงเลือด</li>
+        <li>ชนิดเลือด (PRC / LPRC / FFP / Platelet / WB)</li>
+        <li>Blood Group, Rh, หมายเลขถุงเลือด, ปริมาณ (mL)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sub-card no-break">
+    <div class="sub-header">
+      <span class="sub-badge">ง</span>
+      <span class="sub-title">ตรวจสอบข้อมูลที่ตรงกัน</span>
+    </div>
+    <div class="sub-body">
+      <table style="margin:0 0 10px;">
+        <tr><th>รายการ</th><th>ผล</th></tr>
+        <tr><td>✅ ชื่อ-สกุล ตรงกัน</td><td>ดำเนินการต่อได้</td></tr>
+        <tr><td>⚠️ ชื่อ-สกุล ต่างกัน</td><td>ตรวจสอบอีกครั้ง (OCR อาจอ่านผิด)</td></tr>
+        <tr><td>✅ HN ตรงกัน</td><td>ดำเนินการต่อได้</td></tr>
+        <tr><td>❌ HN ไม่ตรงกัน</td><td><strong>ห้ามให้เลือด</strong> — ระบบบล็อก</td></tr>
       </table>
-      <p>จากนั้นกด <strong>"ยืนยัน → ตรวจสอบ Blood Group + ชนิดเลือด"</strong></p>
+      <p style="font-size:12px; margin:0;">เมื่อข้อมูลตรงกัน → กด <strong>"ยืนยัน → ตรวจสอบ Blood Group + ชนิดเลือด"</strong></p>
     </div>
   </div>
 
   <!-- PASS / FAIL -->
-  <h3>3. ผลการตรวจสอบ</h3>
+  <h3>3. ผลการตรวจสอบ Blood Group</h3>
   <div class="two-col no-break">
-    <div class="mini-card">
-      <div class="mini-title">✅ PASS — ข้อมูลตรงกัน</div>
+    <div class="mini-card" style="border-color:#1A7A4A;">
+      <div class="mini-title" style="color:#1A7A4A;">✅ PASS — ข้อมูลตรงกัน</div>
       <ul>
-        <li>ระบบแสดงสรุปสีเขียว</li>
-        <li>ไปขั้นตอนที่ 2 ได้เลย</li>
+        <li>ระบบแสดง Checklist ก่อนออกไปเตียง:</li>
+        <li>☑ เตรียมป้ายมือให้เลือด</li>
+        <li>☑ เตรียมใบยินยอมให้เลือด</li>
+        <li>กดทั้ง 2 ข้อ → กด <strong>"ไปขั้นตอน 2"</strong></li>
       </ul>
     </div>
-    <div class="mini-card" style="border-color:#FADBD8;">
+    <div class="mini-card" style="border-color:#A32D2D;">
       <div class="mini-title" style="color:#A32D2D;">❌ FAIL — ข้อมูลไม่ตรง</div>
       <ul>
-        <li>Alert สีแดง + เสียงเตือน</li>
+        <li>แถบแดง + เสียงเตือนดัง</li>
+        <li>แสดงสาเหตุชัดเจน เช่น:<br>"Blood Group ไม่ตรง: A+ / B+"</li>
         <li><strong>ห้ามให้เลือดโดยเด็ดขาด</strong></li>
         <li>ระบบบันทึก FAIL log อัตโนมัติ</li>
-        <li>ส่งถุงเลือดคืน Blood Bank</li>
         <li>กด <strong>"ล้างข้อมูล เริ่มใหม่"</strong></li>
       </ul>
     </div>
@@ -498,55 +367,51 @@
   <div class="step-card no-break">
     <div class="step-body">
       <ol>
-        <li>ตรวจสอบสรุปข้อมูลที่แสดงบนหน้าจอ</li>
-        <li><strong>พยาบาลคนที่ 1</strong> — ชื่อแสดงอัตโนมัติจากการ Login (ไม่ต้องกรอก)</li>
-        <li><strong>พยาบาลคนที่ 2</strong> — กรอกชื่อพยาบาลที่ยืนยันร่วม <em>(ต้องเป็นคนละคนกับพยาบาลที่ 1)</em></li>
+        <li>ตรวจสอบสรุปข้อมูลทั้งหมดอีกครั้ง</li>
+        <li><strong>พยาบาลคนที่ 1</strong> — แสดงชื่ออัตโนมัติจาก Login (ไม่ต้องกรอก)</li>
+        <li><strong>พยาบาลคนที่ 2</strong> — กรอกชื่อพยาบาลที่มายืนยันร่วม (ต้องเป็นคนละคน)</li>
         <li>กด <strong>"ยืนยันเริ่มให้เลือด — บันทึกเวลา"</strong></li>
       </ol>
-      <div class="alert alert-danger">
-        <div class="alert-icon">🚫</div>
-        <div><div class="alert-title">ห้ามกรอกชื่อตัวเองซ้ำ</div><p>ระบบตรวจจับและไม่อนุญาตให้พยาบาลคนที่ 1 และ 2 เป็นชื่อเดียวกัน</p></div>
-      </div>
     </div>
   </div>
 
   <!-- STEP 3 -->
-  <h3>5. ขั้นตอนที่ 3 — หน้าสรุปสำเร็จ</h3>
+  <h3>5. ขั้นตอนที่ 3 — บันทึกสำเร็จ</h3>
   <div class="step-card no-break">
     <div class="step-body">
-      <p>หลังยืนยัน ระบบแสดง <strong>✅ บันทึกสำเร็จ</strong> พร้อมสรุปข้อมูลการให้เลือดทั้งหมด</p>
-      <h4>การบันทึกภาพ / แชร์ไป LINE:</h4>
-      <ol>
-        <li>กด <strong>"บันทึกภาพ / แชร์ไป LINE"</strong></li>
-        <li>มือถือเปิด Share sheet → เลือก <strong>LINE</strong> หรือ <strong>บันทึกรูป</strong></li>
-        <li>ส่งเข้า Line กลุ่ม Ward ได้เลย</li>
-      </ol>
-      <h4>เริ่มผู้ป่วยรายต่อไป:</h4>
-      <p>กด <strong>"เริ่มผู้ป่วยรายต่อไป"</strong> → ระบบล้างข้อมูลและกลับสู่ขั้นตอนที่ 1 อัตโนมัติ</p>
+      <p>ระบบแสดง <strong>✅ บันทึกสำเร็จ</strong> พร้อมเวลาเริ่มให้เลือดและสรุปข้อมูลทั้งหมด</p>
+      <table style="margin-top:10px;">
+        <tr><th>ปุ่ม</th><th>ทำอะไร</th></tr>
+        <tr><td><strong>บันทึกภาพ / แชร์ไป LINE</strong></td><td>สร้างภาพสรุป → แชร์เข้า LINE กลุ่ม Ward</td></tr>
+        <tr><td><strong>ถุงเลือดถัดไป</strong></td><td>สแกนถุงเลือดใบใหม่ (ผู้ป่วยคนเดิม)</td></tr>
+        <tr><td><strong>ผู้ป่วยรายต่อไป</strong></td><td>ล้างข้อมูลทั้งหมด เริ่มต้นใหม่</td></tr>
+      </table>
     </div>
   </div>
 
-  <!-- TIMEOUT & LOGOUT -->
-  <h3>6. Session Timeout และการออกจากระบบ</h3>
+  <!-- TIPS -->
+  <h3>6. Session Timeout &amp; เคล็ดลับ OCR</h3>
   <div class="two-col no-break">
     <div class="mini-card">
       <div class="mini-title">⏱ Session Timeout</div>
       <ul>
-        <li>ไม่ใช้งาน <strong>5 นาที</strong> → ล้างข้อมูลผู้ป่วยอัตโนมัติ</li>
+        <li>ไม่ใช้งาน <strong>5 นาที</strong> → ล้างข้อมูลผู้ป่วยอัตโนมัติ (PDPA)</li>
         <li>ต้องเริ่มขั้นตอนที่ 1 ใหม่</li>
         <li>ไม่ต้อง Login ใหม่</li>
       </ul>
     </div>
     <div class="mini-card">
-      <div class="mini-title">🚪 ออกจากระบบ</div>
+      <div class="mini-title">📷 เคล็ดลับถ่ายรูปให้ OCR แม่น</div>
       <ul>
-        <li>กดปุ่ม <strong>Logout</strong> มุมบนขวา</li>
-        <li>ควร Logout ทุกครั้งที่ใช้งานเสร็จ</li>
+        <li>ถ่ายในที่มีแสงเพียงพอ หลีกเลี่ยงเงา</li>
+        <li>ถือมือถือนิ่ง ไม่เบลอ</li>
+        <li>ปรับกรอบตัดครอบเฉพาะข้อความ</li>
+        <li>OCR อ่านผิด → แก้ไขในช่องได้เลย</li>
       </ul>
     </div>
   </div>
 
-  <div class="footer">SRK Safe Blood Transfusion System — คู่มือการใช้งาน v1.0</div>
+  <div class="footer">SRK Safe Blood Transfusion System — คู่มือการใช้งาน v2.0</div>
 </div>
 
 <!-- ===== SECTION 2: ADMIN ===== -->
@@ -554,7 +419,7 @@
   <div class="section-banner" style="background: linear-gradient(135deg, #374151, #1f2937);">
     <div class="section-num">ส่วนที่ 2</div>
     <h2>คู่มือสำหรับผู้ดูแลระบบ (Admin)</h2>
-    <p>การจัดการ Audit Log, ผู้ใช้งาน และการดูแลระบบ</p>
+    <p>การจัดการผู้ใช้งาน, Ward, Audit Log และการดูแลระบบ</p>
   </div>
 
   <!-- ADMIN LOGIN -->
@@ -562,125 +427,148 @@
   <div class="step-card no-break">
     <div class="step-body">
       <ol>
-        <li>Login ด้วย Email/Password Admin ที่ตั้งค่าไว้</li>
-        <li>หลัง Login จะเห็น <strong>Admin Dashboard</strong> ซึ่งแตกต่างจากหน้าพยาบาล</li>
-        <li>Dashboard แสดง Audit Log จากทุก Ward</li>
+        <li>หน้า Login → เลือก Ward: <strong>ผู้ดูแลระบบ</strong> → เลือกชื่อ Admin → กรอก Password</li>
+        <li>หลัง Login จะเห็นเมนูเพิ่มเติม: <strong>Admin</strong> · <strong>Audit Log</strong> · <strong>เปลี่ยนรหัสผ่าน</strong></li>
       </ol>
     </div>
   </div>
 
   <!-- AUDIT LOG -->
-  <h3>8. การดู Audit Log</h3>
+  <h3>8. การดู Audit Log &amp; OCR Quota</h3>
   <div class="step-card no-break">
     <div class="step-body">
-      <h4>คอลัมน์ที่แสดงในตาราง:</h4>
-      <table>
-        <tr><th>คอลัมน์</th><th>ความหมาย</th></tr>
-        <tr><td>Ward</td><td>ชื่อหอผู้ป่วย</td></tr>
-        <tr><td>เวลา</td><td>วันเวลาที่ให้เลือด</td></tr>
-        <tr><td>Wristband ID</td><td>รหัส Barcode ป้ายข้อมือผู้ป่วย</td></tr>
-        <tr><td>ถุงเลือด</td><td>รหัสถุงเลือด</td></tr>
-        <tr><td>ชนิด</td><td>PRC / FFP / Platelet / WB</td></tr>
-        <tr><td>Blood Group</td><td>หมู่โลหิตถุงเลือด</td></tr>
-        <tr><td>ผลการ Match</td><td>✅ PASS หรือ ❌ FAIL</td></tr>
-        <tr><td>พยาบาล 1 / 2</td><td>ชื่อพยาบาลที่ยืนยัน</td></tr>
-      </table>
+      <p>ไปที่เมนู <strong>Audit Log</strong> — Admin เห็น Log <strong>ทุก Ward</strong>, พยาบาลเห็นเฉพาะ Ward ตัวเอง</p>
 
-      <h4>การ Filter:</h4>
-      <div class="two-col">
+      <h4>ฟีเจอร์การกรอง:</h4>
+      <div class="two-col" style="margin-bottom:12px;">
         <div class="mini-card">
           <div class="mini-title">กรองตามวันที่</div>
-          <ul><li>เลือกวันที่ต้องการดู</li><li>แสดงเฉพาะ Log ของวันนั้น</li></ul>
+          <ul><li>เลือกวันที่ → แสดงเฉพาะ Log วันนั้น</li></ul>
         </div>
         <div class="mini-card">
           <div class="mini-title">กรองตามผล</div>
-          <ul><li>PASS — แสดงเฉพาะที่ผ่าน</li><li>FAIL — แสดงเฉพาะที่ไม่ผ่าน</li><li>ทั้งหมด — แสดงทุกรายการ</li></ul>
+          <ul><li>PASS · FAIL · ทั้งหมด</li><li>Export Excel (.xlsx)</li></ul>
         </div>
       </div>
 
-      <div class="alert alert-info">
-        <div class="alert-icon">📥</div>
-        <div><div class="alert-title">Export ข้อมูล CSV</div>
-        <p>Supabase Dashboard → Table Editor → transfusion_logs → Export → CSV</p></div>
+      <h4>ยอด OCR Scans เดือนนี้ (แสดงด้านบนตาราง):</h4>
+      <div class="quota-bar">
+        <span class="qb-label">OCR Scans เดือนนี้</span>
+        <span class="qb-value">245 / 1,000</span>
       </div>
+      <div class="quota-bar quota-bar-warn">
+        <span class="qb-label">⚠️ OCR Scans เดือนนี้ — ใกล้ถึงลิมิต</span>
+        <span class="qb-value">920 / 1,000</span>
+      </div>
+      <p style="font-size:12px; margin-top:6px;">เมื่อครบ <strong>900 scan</strong> ระบบหยุด OCR อัตโนมัติ — พยาบาลต้องกรอก HN เอง (Quota reset ทุกวันที่ 1 ของเดือน)</p>
     </div>
   </div>
 
   <!-- USER MANAGEMENT -->
-  <h3>9. การจัดการผู้ใช้งาน</h3>
-
-  <h4>เพิ่มพยาบาล / User ใหม่</h4>
+  <h3>9. เพิ่ม Nurse User ใหม่</h3>
   <div class="step-card no-break">
     <div class="step-body">
+      <p>ไปที่ <strong>Admin</strong> → ส่วนที่ 1 <em>"เพิ่ม Nurse User ใหม่"</em></p>
       <ol>
-        <li>เข้า <strong>Supabase Dashboard</strong> → Project → <strong>Authentication → Users</strong></li>
-        <li>กด <strong>"Add User → Create new user"</strong></li>
-        <li>กรอก <strong>Email</strong> และ <strong>Password</strong></li>
-        <li>หลัง Create → คลิกที่ User → <strong>"Edit User Metadata"</strong></li>
-        <li>กรอก metadata ดังนี้:</li>
+        <li>กรอก <strong>Email</strong> — อีเมลพยาบาล (ใช้ Login)</li>
+        <li>กรอก <strong>ชื่อ-สกุล</strong> พยาบาล</li>
+        <li>เลือก <strong>Ward</strong> ที่พยาบาลประจำ</li>
+        <li>กรอก <strong>Password</strong> เริ่มต้น (อย่างน้อย 6 ตัวอักษร)</li>
+        <li>เลือก <strong>Role</strong>: Nurse หรือ Admin</li>
+        <li>กด <strong>"สร้าง User"</strong> — ระบบสร้างบัญชีทันที</li>
       </ol>
-      <div class="code-block">{
-  "nurse_name": "ชื่อ-สกุล พยาบาล",
-  "ward_id": "ward-A",
-  "ward_name": "ศัลยกรรมชาย",
-  "role": "nurse"
-}</div>
+      <div class="alert alert-info" style="margin-top:10px;">
+        <div class="alert-icon">ℹ️</div>
+        <div><p>Admin 1 Ward มีได้สูงสุด 2 คน — ระบบแจ้งเตือนถ้าเต็ม</p></div>
+      </div>
     </div>
   </div>
 
-  <h4>ตาราง ward_id</h4>
-  <table class="ward-table no-break">
-    <tr><th>ward_id</th><th>ward_name</th><th>ward_id</th><th>ward_name</th></tr>
-    <tr><td>ward-A</td><td>ศัลยกรรมชาย</td><td>ward-H</td><td>วิกฤตอายุรกรรม</td></tr>
-    <tr><td>ward-B</td><td>ศัลยกรรมหญิง</td><td>ward-I</td><td>วิกฤตอุบัติเหตุ, ศัลยกรรมหัวใจ</td></tr>
-    <tr><td>ward-C</td><td>อายุรกรรมชาย</td><td>ward-J</td><td>ห้องผ่าตัดศัลยกรรม</td></tr>
-    <tr><td>ward-D</td><td>กุมารเวชกรรม</td><td>ward-K</td><td>ห้องผ่าตัดสูติกรรม</td></tr>
-    <tr><td>ward-E</td><td>สูติกรรม</td><td>ward-L</td><td>อุบัติเหตุชาย</td></tr>
-    <tr><td>ward-F</td><td>อายุรกรรมหญิง</td><td>ward-M</td><td>อาคาร 1 ชั้น 4</td></tr>
-    <tr><td>ward-G</td><td>วิกฤตศัลยกรรม</td><td>ward-N</td><td>อาคาร 2 ชั้น 6</td></tr>
-  </table>
+  <!-- WARD TOGGLE -->
+  <h3>10. เปิด/ปิด Ward ที่แสดงในหน้า Login</h3>
+  <div class="step-card no-break">
+    <div class="step-body">
+      <p>ไปที่ <strong>Admin</strong> → ส่วนที่ 2 <em>"สถานะ Ward (แสดงในหน้า Login)"</em></p>
+      <p>แต่ละ Ward Card มี <strong>Toggle Switch</strong> ที่มุมบนขวา:</p>
 
-  <h4>เพิ่ม Admin ใหม่</h4>
-  <div class="code-block">{
-  "nurse_name": "ชื่อ-สกุล ผู้ดูแลระบบ",
-  "ward_id": "admin",
-  "ward_name": "ผู้ดูแลระบบ",
-  "role": "admin"
-}</div>
+      <div class="toggle-row">
+        <span class="toggle-on"></span>
+        <strong>เปิด (สีน้ำเงิน)</strong> — Ward ปรากฏในหน้า Login ให้พยาบาลเลือกได้
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-off"></span>
+        <strong>ปิด (สีเทา)</strong> — Ward ถูกซ่อน พยาบาลไม่เห็นในหน้า Login
+      </div>
 
-  <div class="two-col no-break" style="margin-top:16px;">
-    <div class="mini-card">
-      <div class="mini-title">🔑 Reset รหัสผ่าน</div>
-      <ul>
-        <li>Supabase → Authentication → Users</li>
-        <li>คลิก User → <strong>Send Password Reset Email</strong></li>
-        <li>ระบบส่ง link ไปที่ Email</li>
-      </ul>
-    </div>
-    <div class="mini-card">
-      <div class="mini-title">🗑 ลบ User</div>
-      <ul>
-        <li>Supabase → Authentication → Users</li>
-        <li>คลิก User ที่ต้องการลบ</li>
-        <li>กด <strong>Delete User</strong></li>
-      </ul>
+      <div class="alert alert-warning" style="margin-top:12px;">
+        <div class="alert-icon">💡</div>
+        <div><div class="alert-title">วิธีใช้</div>
+        <p>กด Toggle Switch → ระบบบันทึกทันที ไม่ต้อง Refresh หน้า Login<br>
+        Ward ที่ปิดยังสามารถสร้าง/แก้ไข Nurse ได้ตามปกติ เพียงแต่ไม่แสดงในหน้า Login</p></div>
+      </div>
     </div>
   </div>
 
-  <!-- POLICY -->
-  <h3>10. นโยบายข้อมูลและความปลอดภัย</h3>
+  <!-- EDIT / DELETE -->
+  <h3>11. แก้ไข / ลบ Nurse User</h3>
+  <div class="step-card no-break">
+    <div class="step-body">
+      <p>ไปที่ <strong>Admin</strong> → ส่วนที่ 3 <em>"รายชื่อ Nurse ทั้งหมด"</em></p>
+
+      <h4>แก้ไขข้อมูล:</h4>
+      <ol>
+        <li>กด <strong>"แก้ไข"</strong> ข้างชื่อพยาบาล</li>
+        <li>แก้ไขชื่อ / Ward / Role / Password ได้ตามต้องการ</li>
+        <li>กด <strong>"บันทึก"</strong> หรือ <strong>"ยกเลิก"</strong></li>
+      </ol>
+
+      <h4>ลบ Nurse (กรณีลาออก ฯลฯ):</h4>
+      <ol>
+        <li>กด <strong>"แก้ไข"</strong> → เลื่อนดูด้านล่างสุด</li>
+        <li>กด <strong>"ลบชื่อออกจากระบบ"</strong> (ข้อความสีแดง)</li>
+        <li>ระบบขอยืนยัน: <em>"ยืนยันลบ [ชื่อพยาบาล] ?"</em></li>
+        <li>กด <strong>"ลบเลย"</strong> เพื่อยืนยัน หรือ <strong>"ยกเลิก"</strong></li>
+      </ol>
+
+      <div class="alert alert-danger" style="margin-top:8px;">
+        <div class="alert-icon">🚫</div>
+        <div><div class="alert-title">ข้อควรระวัง</div><p>Admin ไม่สามารถลบบัญชีตัวเองได้ — ระบบป้องกันอัตโนมัติ</p></div>
+      </div>
+
+      <h4 style="margin-top:14px;">Reset รหัสผ่านพยาบาล:</h4>
+      <div class="two-col" style="margin-top:6px;">
+        <div class="mini-card">
+          <div class="mini-title">วิธีที่ 1 — Admin Panel</div>
+          <ul>
+            <li>Admin → รายชื่อ Nurse → แก้ไข</li>
+            <li>กรอก Password ใหม่ → บันทึก</li>
+          </ul>
+        </div>
+        <div class="mini-card">
+          <div class="mini-title">วิธีที่ 2 — Supabase</div>
+          <ul>
+            <li>Authentication → Users → คลิก User</li>
+            <li>Send Password Reset Email</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PDPA -->
+  <h3>12. นโยบายข้อมูล (PDPA)</h3>
   <div class="highlight-box no-break">
     <table style="margin:0;">
       <tr><th>หัวข้อ</th><th>รายละเอียด</th></tr>
-      <tr><td>ระยะเวลาเก็บ Log</td><td>60 วัน — ลบอัตโนมัติทุกวันตี 4 น. (Vercel Cron)</td></tr>
-      <tr><td>ข้อมูลผู้ป่วย</td><td>เก็บเฉพาะ Wristband ID (Barcode) — ไม่เก็บชื่อ/วันเกิด (PDPA)</td></tr>
+      <tr><td>ระยะเวลาเก็บ Log</td><td>60 วัน — ลบอัตโนมัติทุกวันตี 4 น.</td></tr>
+      <tr><td>ข้อมูลผู้ป่วย</td><td>เก็บเฉพาะ Wristband ID (Barcode) — ไม่เก็บชื่อ/วันเกิด</td></tr>
+      <tr><td>ข้อมูลระหว่างใช้งาน</td><td>อยู่ใน RAM เท่านั้น — ล้างเมื่อ session timeout หรือบันทึกสำเร็จ</td></tr>
       <tr><td>การแยก Ward</td><td>พยาบาลเห็นเฉพาะ Log ของ Ward ตัวเอง (Row Level Security)</td></tr>
-      <tr><td>Admin</td><td>เห็น Log ทุก Ward</td></tr>
-      <tr><td>Supabase Free Tier</td><td>ขีดจำกัด 500 MB — ระบบ retention ป้องกันเกิน</td></tr>
+      <tr><td>OCR ภาพถ่าย</td><td>Google Cloud Vision API ไม่จัดเก็บภาพหลัง OCR เสร็จ</td></tr>
     </table>
   </div>
 
-  <div class="footer">SRK Safe Blood Transfusion System — คู่มือการใช้งาน v1.0 &nbsp;·&nbsp; มิถุนายน 2569</div>
+  <div class="footer">SRK Safe Blood Transfusion System — คู่มือการใช้งาน v2.0 &nbsp;·&nbsp; มิถุนายน 2569</div>
 </div>
 
 </body>
