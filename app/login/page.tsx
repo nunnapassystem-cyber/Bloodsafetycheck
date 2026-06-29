@@ -68,7 +68,7 @@ export default function LoginPage() {
         <h1 className="text-xl font-bold text-gray-900 mb-1 text-center">
           SRK Safe Blood Transfusion System
         </h1>
-        <p className="text-sm text-gray-500 mb-6 text-center">ระบบตรวจสอบความปลอดภัยการให้เลือด</p>
+        <p className="text-sm text-gray-500 mb-6 text-center">ตรวจสอบความปลอดภัยให้เลือด</p>
 
         {error && (
           <div className="bg-danger-light border border-danger text-danger text-sm font-medium rounded p-3 mb-4">
