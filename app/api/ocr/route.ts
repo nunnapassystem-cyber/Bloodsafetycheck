@@ -32,7 +32,9 @@ export async function POST(request: Request) {
   if (!visionRes.ok) {
     const err = await visionRes.text()
     console.error('Vision API error:', err)
-    return NextResponse.json({ error: 'Vision API failed' }, { status: 502 })
+    let errMsg = 'Vision API failed'
+    try { errMsg = JSON.parse(err)?.error?.message ?? errMsg } catch { /* ignore */ }
+    return NextResponse.json({ error: errMsg }, { status: 502 })
   }
 
   const visionData = await visionRes.json()
