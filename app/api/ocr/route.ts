@@ -18,6 +18,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Vision API not configured' }, { status: 500 })
   }
 
+  // ตรวจสอบ quota เดือนนี้ก่อนส่ง Vision API
+  const OCR_MONTHLY_LIMIT = 900
+  const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
+  const { count: scanCount } = await supabase
+    .from('ocr_scans')
+    .select('*', { count: 'exact', head: true })
+    .gte('created_at', startOfMonth)
+  if ((scanCount ?? 0) >= OCR_MONTHLY_LIMIT) {
+    return NextResponse.json({ error: `OCR เกิน quota เดือนนี้ (${OCR_MONTHLY_LIMIT} ครั้ง) — กรุณากรอก HN เอง` }, { status: 429 })
+  }
+
   const visionRes = await fetch(VISION_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
