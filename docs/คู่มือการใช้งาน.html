@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>คู่มือการใช้งาน — SRK Safe Blood Transfusion System</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Sarabun', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #1f2937;
+    background: #fff;
+  }
+
+  .cover {
+    page-break-after: always;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(160deg, #185FA5 0%, #0C447C 100%);
+    color: white;
+    text-align: center;
+    padding: 60px 40px;
+  }
+
+  .cover .logo-ring {
+    width: 90px; height: 90px;
+    border: 4px solid rgba(255,255,255,0.6);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 32px;
+    font-size: 36px;
+  }
+
+  .cover h1 {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: 0.3px;
+  }
+
+  .cover h2 {
+    font-size: 16px;
+    font-weight: 400;
+    opacity: 0.85;
+    margin-bottom: 48px;
+  }
+
+  .cover .badge-row {
+    display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+    margin-bottom: 60px;
+  }
+
+  .cover .badge {
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 24px;
+    padding: 6px 20px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .cover .version {
+    font-size: 11px;
+    opacity: 0.6;
+    margin-top: auto;
+  }
+
+  /* TOC */
+  .toc-page {
+    page-break-after: always;
+    padding: 60px 64px;
+  }
+
+  .toc-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #185FA5;
+    border-bottom: 2px solid #185FA5;
+    padding-bottom: 10px;
+    margin-bottom: 28px;
+  }
+
+  .toc-section {
+    margin-bottom: 24px;
+  }
+
+  .toc-section-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #6b7280;
+    margin-bottom: 10px;
+  }
+
+  .toc-item {
+    display: flex;
+    align-items: baseline;
+    padding: 5px 0;
+    font-size: 13px;
+    color: #374151;
+  }
+
+  .toc-item .dots {
+    flex: 1;
+    border-bottom: 1px dotted #d1d5db;
+    margin: 0 8px;
+    position: relative;
+    top: -2px;
+  }
+
+  .toc-item .num {
+    font-weight: 600;
+    color: #185FA5;
+    min-width: 20px;
+    margin-right: 8px;
+  }
+
+  /* Content pages */
+  .page {
+    padding: 48px 64px;
+  }
+
+  .section-divider {
+    page-break-before: always;
+  }
+
+  /* Section header banner */
+  .section-banner {
+    background: linear-gradient(135deg, #185FA5, #0C447C);
+    color: white;
+    border-radius: 10px;
+    padding: 20px 28px;
+    margin-bottom: 32px;
+  }
+
+  .section-banner .section-num {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.75;
+    margin-bottom: 4px;
+  }
+
+  .section-banner h2 {
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .section-banner p {
+    font-size: 12px;
+    opacity: 0.8;
+    margin-top: 4px;
+  }
+
+  /* Step cards */
+  .step-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+
+  .step-header {
+    background: #f3f4f6;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .step-num {
+    background: #185FA5;
+    color: white;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .step-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  .step-body {
+    padding: 16px 20px;
+  }
+
+  .step-body ol, .step-body ul {
+    padding-left: 18px;
+  }
+
+  .step-body li {
+    margin-bottom: 6px;
+    color: #374151;
+  }
+
+  /* Alert boxes */
+  .alert {
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 14px 0;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .alert-danger {
+    background: #FADBD8;
+    border-left: 4px solid #A32D2D;
+    color: #7B1F1F;
+  }
+
+  .alert-success {
+    background: #D5F0E3;
+    border-left: 4px solid #1A7A4A;
+    color: #145C38;
+  }
+
+  .alert-warning {
+    background: #FDF3DC;
+    border-left: 4px solid #B7770D;
+    color: #8A5A09;
+  }
+
+  .alert-info {
+    background: #D6E8FA;
+    border-left: 4px solid #185FA5;
+    color: #0C447C;
+  }
+
+  .alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .alert-title { font-weight: 600; font-size: 12px; margin-bottom: 2px; }
+  .alert p { font-size: 12px; margin: 0; }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 12px;
+  }
+
+  th {
+    background: #185FA5;
+    color: white;
+    padding: 9px 12px;
+    text-align: left;
+    font-weight: 600;
+  }
+
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #e5e7eb;
+    color: #374151;
+  }
+
+  tr:nth-child(even) td { background: #f9fafb; }
+
+  /* Code block */
+  .code-block {
+    background: #1f2937;
+    color: #e5e7eb;
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    line-height: 1.8;
+    margin: 12px 0;
+    white-space: pre;
+    overflow: hidden;
+  }
+
+  /* Subsection headings */
+  h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #185FA5;
+    margin: 24px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #dbeafe;
+  }
+
+  h4 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin: 16px 0 8px;
+  }
+
+  p { margin-bottom: 10px; color: #374151; }
+
+  /* Ward table compact */
+  .ward-table th { background: #374151; }
+  .ward-table td:first-child { font-family: monospace; font-size: 11px; color: #185FA5; font-weight: 600; }
+
+  /* Footer */
+  .footer {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+    font-size: 10px;
+    color: #9ca3af;
+    text-align: center;
+  }
+
+  /* Print */
+  @media print {
+    .section-divider { page-break-before: always; }
+    .no-break { page-break-inside: avoid; }
+  }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0; }
+
+  .mini-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+
+  .mini-card .mini-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  .mini-card ul { padding-left: 14px; }
+  .mini-card li { font-size: 12px; color: #374151; margin-bottom: 4px; }
+
+  .highlight-box {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 14px 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== COVER ===== -->
+<div class="cover">
+  <div class="logo-ring">🩸</div>
+  <h1>ระบบตรวจสอบความปลอดภัยการให้เลือด</h1>
+  <h2>SRK Safe Blood Transfusion System</h2>
+  <div class="badge-row">
+    <div class="badge">คู่มือพยาบาล (User)</div>
+    <div class="badge">คู่มือผู้ดูแลระบบ (Admin)</div>
+  </div>
+  <div class="version">เวอร์ชัน 1.0 &nbsp;·&nbsp; มิถุนายน 2569 &nbsp;·&nbsp; โรงพยาบาล SRK</div>
+</div>
+
+<!-- ===== TOC ===== -->
+<div class="toc-page">
+  <div class="toc-title">สารบัญ</div>
+
+  <div class="toc-section">
+    <div class="toc-section-label">ส่วนที่ 1 — พยาบาล (User)</div>
+    <div class="toc-item"><span class="num">1.</span> การเข้าสู่ระบบ <span class="dots"></span> 3</div>
+    <div class="toc-item"><span class="num">2.</span> ขั้นตอนที่ 1 — Scan และระบุข้อมูลผู้ป่วย + ถุงเลือด <span class="dots"></span> 3</div>
+    <div class="toc-item"><span class="num">3.</span> ผลการตรวจสอบ (PASS / FAIL) <span class="dots"></span> 4</div>
+    <div class="toc-item"><span class="num">4.</span> ขั้นตอนที่ 2 — ยืนยันด้วยพยาบาล 2 คน <span class="dots"></span> 4</div>
+    <div class="toc-item"><span class="num">5.</span> ขั้นตอนที่ 3 — หน้าสรุปสำเร็จ / แชร์ LINE <span class="dots"></span> 5</div>
+    <div class="toc-item"><span class="num">6.</span> Session Timeout และการออกจากระบบ <span class="dots"></span> 5</div>
+  </div>
+
+  <div class="toc-section">
+    <div class="toc-section-label">ส่วนที่ 2 — ผู้ดูแลระบบ (Admin)</div>
+    <div class="toc-item"><span class="num">7.</span> การเข้าสู่ระบบ Admin <span class="dots"></span> 6</div>
+    <div class="toc-item"><span class="num">8.</span> การดู Audit Log <span class="dots"></span> 6</div>
+    <div class="toc-item"><span class="num">9.</span> การจัดการผู้ใช้งาน <span class="dots"></span> 7</div>
+    <div class="toc-item"><span class="num">10.</span> นโยบายข้อมูลและความปลอดภัย <span class="dots"></span> 8</div>
+  </div>
+</div>
+
+<!-- ===== SECTION 1: USER ===== -->
+<div class="page section-divider">
+  <div class="section-banner">
+    <div class="section-num">ส่วนที่ 1</div>
+    <h2>คู่มือสำหรับพยาบาล (User)</h2>
+    <p>ขั้นตอนการใช้งานระบบตรวจสอบความปลอดภัยก่อนให้เลือดผู้ป่วย</p>
+  </div>
+
+  <!-- LOGIN -->
+  <h3>1. การเข้าสู่ระบบ</h3>
+  <div class="step-card no-break">
+    <div class="step-body">
+      <ol>
+        <li>เปิด Browser บนมือถือหรือ Tablet → ไปที่ URL ของระบบ</li>
+        <li>กรอก <strong>Email</strong> และ <strong>Password</strong> ที่ได้รับจาก Admin</li>
+        <li>กด <strong>"เข้าสู่ระบบ"</strong></li>
+        <li>หน้าหลักจะแสดง <strong>ชื่อพยาบาล</strong> และ <strong>Ward</strong> ของท่านที่มุมบนขวา</li>
+      </ol>
+      <div class="alert alert-info">
+        <div class="alert-icon">ℹ️</div>
+        <div><div class="alert-title">ลืมรหัสผ่าน</div><p>ติดต่อผู้ดูแลระบบ (Admin) เพื่อ Reset รหัสผ่าน</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 1 -->
+  <h3>2. ขั้นตอนที่ 1 — Scan และระบุข้อมูล</h3>
+
+  <div class="step-card no-break">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div class="step-title">Scan สติ๊กเกอร์ผู้ป่วย (จากแบบบันทึกการให้โลหิต)</div>
+    </div>
+    <div class="step-body">
+      <ol>
+        <li>กดปุ่ม <strong>"Scan ชื่อผู้ป่วย หน้า Order สั่งให้เลือด"</strong></li>
+        <li>ให้กล้องจับ Barcode/QR Code บนแบบบันทึกการให้โลหิต</li>
+        <li>ระบบอ่าน HN อัตโนมัติ</li>
+      </ol>
+      <div class="alert alert-warning">
+        <div class="alert-icon">⚠️</div>
+        <div><div class="alert-title">กรณี Scan ไม่ได้</div>
+        <p>กด <strong>"Scan ใหม่"</strong> เพื่อลองอีกครั้ง หรือกด <strong>"พิมพ์ HN เอง"</strong> → กรอก HN ด้วยมือ → กด <strong>ยืนยัน</strong></p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card no-break">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div class="step-title">Scan ถุงเลือด</div>
+    </div>
+    <div class="step-body">
+      <ol>
+        <li>หลังได้ HN แล้ว → กดปุ่ม <strong>"Scan ถุงเลือด"</strong></li>
+        <li>ให้กล้องจับ Barcode บนถุงเลือด</li>
+        <li>ระบบบันทึกรหัสถุงเลือดอัตโนมัติ</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="step-card no-break">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <div class="step-title">กรอกข้อมูลตรวจสอบ</div>
+    </div>
+    <div class="step-body">
+      <p>กรอกข้อมูลให้ครบทุกช่อง:</p>
+      <table>
+        <tr><th>ช่องข้อมูล</th><th>อ่านจาก</th></tr>
+        <tr><td>ชื่อ-สกุล ผู้ป่วย</td><td>แบบบันทึกการให้โลหิต</td></tr>
+        <tr><td>Blood Group ผู้ป่วย (ABO + Rh)</td><td>แบบบันทึกการให้โลหิต</td></tr>
+        <tr><td>ชนิดเลือดที่สั่ง (Order แพทย์)</td><td>แบบบันทึกการให้โลหิต</td></tr>
+        <tr><td>Blood Group ถุงเลือด (ABO + Rh)</td><td>ป้ายถุงเลือด</td></tr>
+        <tr><td>ชนิดเลือดในถุง</td><td>ป้ายถุงเลือด</td></tr>
+        <tr><td>ปริมาณ (ml)</td><td>ป้ายถุงเลือด</td></tr>
+      </table>
+      <p>จากนั้นกด <strong>"ยืนยัน → ตรวจสอบ Blood Group + ชนิดเลือด"</strong></p>
+    </div>
+  </div>
+
+  <!-- PASS / FAIL -->
+  <h3>3. ผลการตรวจสอบ</h3>
+  <div class="two-col no-break">
+    <div class="mini-card">
+      <div class="mini-title">✅ PASS — ข้อมูลตรงกัน</div>
+      <ul>
+        <li>ระบบแสดงสรุปสีเขียว</li>
+        <li>ไปขั้นตอนที่ 2 ได้เลย</li>
+      </ul>
+    </div>
+    <div class="mini-card" style="border-color:#FADBD8;">
+      <div class="mini-title" style="color:#A32D2D;">❌ FAIL — ข้อมูลไม่ตรง</div>
+      <ul>
+        <li>Alert สีแดง + เสียงเตือน</li>
+        <li><strong>ห้ามให้เลือดโดยเด็ดขาด</strong></li>
+        <li>ระบบบันทึก FAIL log อัตโนมัติ</li>
+        <li>ส่งถุงเลือดคืน Blood Bank</li>
+        <li>กด <strong>"ล้างข้อมูล เริ่มใหม่"</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <h3>4. ขั้นตอนที่ 2 — ยืนยันด้วยพยาบาล 2 คน</h3>
+  <div class="step-card no-break">
+    <div class="step-body">
+      <ol>
+        <li>ตรวจสอบสรุปข้อมูลที่แสดงบนหน้าจอ</li>
+        <li><strong>พยาบาลคนที่ 1</strong> — ชื่อแสดงอัตโนมัติจากการ Login (ไม่ต้องกรอก)</li>
+        <li><strong>พยาบาลคนที่ 2</strong> — กรอกชื่อพยาบาลที่ยืนยันร่วม <em>(ต้องเป็นคนละคนกับพยาบาลที่ 1)</em></li>
+        <li>กด <strong>"ยืนยันเริ่มให้เลือด — บันทึกเวลา"</strong></li>
+      </ol>
+      <div class="alert alert-danger">
+        <div class="alert-icon">🚫</div>
+        <div><div class="alert-title">ห้ามกรอกชื่อตัวเองซ้ำ</div><p>ระบบตรวจจับและไม่อนุญาตให้พยาบาลคนที่ 1 และ 2 เป็นชื่อเดียวกัน</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <h3>5. ขั้นตอนที่ 3 — หน้าสรุปสำเร็จ</h3>
+  <div class="step-card no-break">
+    <div class="step-body">
+      <p>หลังยืนยัน ระบบแสดง <strong>✅ บันทึกสำเร็จ</strong> พร้อมสรุปข้อมูลการให้เลือดทั้งหมด</p>
+      <h4>การบันทึกภาพ / แชร์ไป LINE:</h4>
+      <ol>
+        <li>กด <strong>"บันทึกภาพ / แชร์ไป LINE"</strong></li>
+        <li>มือถือเปิด Share sheet → เลือก <strong>LINE</strong> หรือ <strong>บันทึกรูป</strong></li>
+        <li>ส่งเข้า Line กลุ่ม Ward ได้เลย</li>
+      </ol>
+      <h4>เริ่มผู้ป่วยรายต่อไป:</h4>
+      <p>กด <strong>"เริ่มผู้ป่วยรายต่อไป"</strong> → ระบบล้างข้อมูลและกลับสู่ขั้นตอนที่ 1 อัตโนมัติ</p>
+    </div>
+  </div>
+
+  <!-- TIMEOUT & LOGOUT -->
+  <h3>6. Session Timeout และการออกจากระบบ</h3>
+  <div class="two-col no-break">
+    <div class="mini-card">
+      <div class="mini-title">⏱ Session Timeout</div>
+      <ul>
+        <li>ไม่ใช้งาน <strong>5 นาที</strong> → ล้างข้อมูลผู้ป่วยอัตโนมัติ</li>
+        <li>ต้องเริ่มขั้นตอนที่ 1 ใหม่</li>
+        <li>ไม่ต้อง Login ใหม่</li>
+      </ul>
+    </div>
+    <div class="mini-card">
+      <div class="mini-title">🚪 ออกจากระบบ</div>
+      <ul>
+        <li>กดปุ่ม <strong>Logout</strong> มุมบนขวา</li>
+        <li>ควร Logout ทุกครั้งที่ใช้งานเสร็จ</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer">SRK Safe Blood Transfusion System — คู่มือการใช้งาน v1.0</div>
+</div>
+
+<!-- ===== SECTION 2: ADMIN ===== -->
+<div class="page section-divider">
+  <div class="section-banner" style="background: linear-gradient(135deg, #374151, #1f2937);">
+    <div class="section-num">ส่วนที่ 2</div>
+    <h2>คู่มือสำหรับผู้ดูแลระบบ (Admin)</h2>
+    <p>การจัดการ Audit Log, ผู้ใช้งาน และการดูแลระบบ</p>
+  </div>
+
+  <!-- ADMIN LOGIN -->
+  <h3>7. การเข้าสู่ระบบ Admin</h3>
+  <div class="step-card no-break">
+    <div class="step-body">
+      <ol>
+        <li>Login ด้วย Email/Password Admin ที่ตั้งค่าไว้</li>
+        <li>หลัง Login จะเห็น <strong>Admin Dashboard</strong> ซึ่งแตกต่างจากหน้าพยาบาล</li>
+        <li>Dashboard แสดง Audit Log จากทุก Ward</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- AUDIT LOG -->
+  <h3>8. การดู Audit Log</h3>
+  <div class="step-card no-break">
+    <div class="step-body">
+      <h4>คอลัมน์ที่แสดงในตาราง:</h4>
+      <table>
+        <tr><th>คอลัมน์</th><th>ความหมาย</th></tr>
+        <tr><td>Ward</td><td>ชื่อหอผู้ป่วย</td></tr>
+        <tr><td>เวลา</td><td>วันเวลาที่ให้เลือด</td></tr>
+        <tr><td>Wristband ID</td><td>รหัส Barcode ป้ายข้อมือผู้ป่วย</td></tr>
+        <tr><td>ถุงเลือด</td><td>รหัสถุงเลือด</td></tr>
+        <tr><td>ชนิด</td><td>PRC / FFP / Platelet / WB</td></tr>
+        <tr><td>Blood Group</td><td>หมู่โลหิตถุงเลือด</td></tr>
+        <tr><td>ผลการ Match</td><td>✅ PASS หรือ ❌ FAIL</td></tr>
+        <tr><td>พยาบาล 1 / 2</td><td>ชื่อพยาบาลที่ยืนยัน</td></tr>
+      </table>
+
+      <h4>การ Filter:</h4>
+      <div class="two-col">
+        <div class="mini-card">
+          <div class="mini-title">กรองตามวันที่</div>
+          <ul><li>เลือกวันที่ต้องการดู</li><li>แสดงเฉพาะ Log ของวันนั้น</li></ul>
+        </div>
+        <div class="mini-card">
+          <div class="mini-title">กรองตามผล</div>
+          <ul><li>PASS — แสดงเฉพาะที่ผ่าน</li><li>FAIL — แสดงเฉพาะที่ไม่ผ่าน</li><li>ทั้งหมด — แสดงทุกรายการ</li></ul>
+        </div>
+      </div>
+
+      <div class="alert alert-info">
+        <div class="alert-icon">📥</div>
+        <div><div class="alert-title">Export ข้อมูล CSV</div>
+        <p>Supabase Dashboard → Table Editor → transfusion_logs → Export → CSV</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- USER MANAGEMENT -->
+  <h3>9. การจัดการผู้ใช้งาน</h3>
+
+  <h4>เพิ่มพยาบาล / User ใหม่</h4>
+  <div class="step-card no-break">
+    <div class="step-body">
+      <ol>
+        <li>เข้า <strong>Supabase Dashboard</strong> → Project → <strong>Authentication → Users</strong></li>
+        <li>กด <strong>"Add User → Create new user"</strong></li>
+        <li>กรอก <strong>Email</strong> และ <strong>Password</strong></li>
+        <li>หลัง Create → คลิกที่ User → <strong>"Edit User Metadata"</strong></li>
+        <li>กรอก metadata ดังนี้:</li>
+      </ol>
+      <div class="code-block">{
+  "nurse_name": "ชื่อ-สกุล พยาบาล",
+  "ward_id": "ward-A",
+  "ward_name": "ศัลยกรรมชาย",
+  "role": "nurse"
+}</div>
+    </div>
+  </div>
+
+  <h4>ตาราง ward_id</h4>
+  <table class="ward-table no-break">
+    <tr><th>ward_id</th><th>ward_name</th><th>ward_id</th><th>ward_name</th></tr>
+    <tr><td>ward-A</td><td>ศัลยกรรมชาย</td><td>ward-H</td><td>วิกฤตอายุรกรรม</td></tr>
+    <tr><td>ward-B</td><td>ศัลยกรรมหญิง</td><td>ward-I</td><td>วิกฤตอุบัติเหตุ, ศัลยกรรมหัวใจ</td></tr>
+    <tr><td>ward-C</td><td>อายุรกรรมชาย</td><td>ward-J</td><td>ห้องผ่าตัดศัลยกรรม</td></tr>
+    <tr><td>ward-D</td><td>กุมารเวชกรรม</td><td>ward-K</td><td>ห้องผ่าตัดสูติกรรม</td></tr>
+    <tr><td>ward-E</td><td>สูติกรรม</td><td>ward-L</td><td>อุบัติเหตุชาย</td></tr>
+    <tr><td>ward-F</td><td>อายุรกรรมหญิง</td><td>ward-M</td><td>อาคาร 1 ชั้น 4</td></tr>
+    <tr><td>ward-G</td><td>วิกฤตศัลยกรรม</td><td>ward-N</td><td>อาคาร 2 ชั้น 6</td></tr>
+  </table>
+
+  <h4>เพิ่ม Admin ใหม่</h4>
+  <div class="code-block">{
+  "nurse_name": "ชื่อ-สกุล ผู้ดูแลระบบ",
+  "ward_id": "admin",
+  "ward_name": "ผู้ดูแลระบบ",
+  "role": "admin"
+}</div>
+
+  <div class="two-col no-break" style="margin-top:16px;">
+    <div class="mini-card">
+      <div class="mini-title">🔑 Reset รหัสผ่าน</div>
+      <ul>
+        <li>Supabase → Authentication → Users</li>
+        <li>คลิก User → <strong>Send Password Reset Email</strong></li>
+        <li>ระบบส่ง link ไปที่ Email</li>
+      </ul>
+    </div>
+    <div class="mini-card">
+      <div class="mini-title">🗑 ลบ User</div>
+      <ul>
+        <li>Supabase → Authentication → Users</li>
+        <li>คลิก User ที่ต้องการลบ</li>
+        <li>กด <strong>Delete User</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- POLICY -->
+  <h3>10. นโยบายข้อมูลและความปลอดภัย</h3>
+  <div class="highlight-box no-break">
+    <table style="margin:0;">
+      <tr><th>หัวข้อ</th><th>รายละเอียด</th></tr>
+      <tr><td>ระยะเวลาเก็บ Log</td><td>60 วัน — ลบอัตโนมัติทุกวันตี 4 น. (Vercel Cron)</td></tr>
+      <tr><td>ข้อมูลผู้ป่วย</td><td>เก็บเฉพาะ Wristband ID (Barcode) — ไม่เก็บชื่อ/วันเกิด (PDPA)</td></tr>
+      <tr><td>การแยก Ward</td><td>พยาบาลเห็นเฉพาะ Log ของ Ward ตัวเอง (Row Level Security)</td></tr>
+      <tr><td>Admin</td><td>เห็น Log ทุก Ward</td></tr>
+      <tr><td>Supabase Free Tier</td><td>ขีดจำกัด 500 MB — ระบบ retention ป้องกันเกิน</td></tr>
+    </table>
+  </div>
+
+  <div class="footer">SRK Safe Blood Transfusion System — คู่มือการใช้งาน v1.0 &nbsp;·&nbsp; มิถุนายน 2569</div>
+</div>
+
+</body>
+</html>

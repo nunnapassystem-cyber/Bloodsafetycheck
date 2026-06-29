@@ -132,11 +132,11 @@ export function PatientStep({ session, nurse1Name }: Props) {
     if (!whn)             { setFormError('กรุณากรอก HN ในสติ๊กเกอร์ข้อมือ'); return }
     if (!patABO || !patRh)    { setFormError('กรุณาเลือก Blood Group ผู้ป่วย'); return }
     if (!orderedComponent)    { setFormError('กรุณาเลือกชนิดเลือดที่สั่ง (Order แพทย์)'); return }
-    if (!bloodBagOcr?.abo || !bloodBagOcr?.rh) { setFormError('กรุณาเลือก Blood Group ถุงเลือด (แก้ไขในช่อง ข)'); return }
-    if (!bloodBagOcr?.component)               { setFormError('กรุณาเลือกชนิดเลือดในถุง (แก้ไขในช่อง ข)'); return }
-    if (!bloodBagOcr?.bagId?.trim())           { setFormError('กรุณากรอกรหัสถุงเลือด (แก้ไขในช่อง ข)'); return }
+    if (!bloodBagOcr?.abo || !bloodBagOcr?.rh) { setFormError('กรุณาเลือก Blood Group ถุงเลือด (แก้ไขในช่อง ค)'); return }
+    if (!bloodBagOcr?.component)               { setFormError('กรุณาเลือกชนิดเลือดในถุง (แก้ไขในช่อง ค)'); return }
+    if (!bloodBagOcr?.bagId?.trim())           { setFormError('กรุณากรอกรหัสถุงเลือด (แก้ไขในช่อง ค)'); return }
     const vol = bloodBagOcr.volumeMl ?? 0
-    if (vol < 1) { setFormError('กรุณากรอกปริมาณ (mL) ในช่อง ข'); return }
+    if (vol < 1) { setFormError('กรุณากรอกปริมาณ (mL) ในช่อง ค'); return }
 
     const patientBG = patABO + (patRh === 'Positive' ? '+' : '-')
     const bagBG     = bloodBagOcr.abo + (bloodBagOcr.rh === 'Positive' ? '+' : '-')
@@ -236,10 +236,50 @@ export function PatientStep({ session, nurse1Name }: Props) {
             )}
           </div>
 
-          {/* ══ ข. บัตรคล้องถุงเลือด ══ */}
-          {wristbandOcr && (
+          {/* ══ ข. กรอกข้อมูลจากแบบบันทึกการให้โลหิต ══ */}
+          {wristbandOcr && !showChecklist && (
             <div className="space-y-2">
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">ข. บัตรคล้องถุงเลือด</p>
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">ข. กรอกข้อมูลจากแบบบันทึกการให้โลหิต</p>
+              <div className="border border-primary rounded-lg overflow-hidden">
+                <div className="p-4 space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-primary block">Blood Group ผู้ป่วย</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <select value={patABO} onChange={e => { setPatABO(e.target.value); setFormError(null) }}
+                              className="w-full border border-gray-200 rounded px-3 py-2 text-sm font-mono focus:outline-none focus:border-primary">
+                        <option value="">ABO...</option>
+                        {ABO_GROUPS.map(g => <option key={g} value={g}>{g}</option>)}
+                      </select>
+                      <select value={patRh} onChange={e => { setPatRh(e.target.value); setFormError(null) }}
+                              className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary">
+                        <option value="">Rh...</option>
+                        {RH_OPTIONS.map(r => <option key={r} value={r}>{r === 'Positive' ? 'Positive (+)' : 'Negative (-)'}</option>)}
+                      </select>
+                    </div>
+                    {patABO && patRh && (
+                      <div className="flex justify-between items-center bg-primary-light rounded px-3 py-2">
+                        <span className="text-xs font-medium text-primary">Blood Group ผู้ป่วย</span>
+                        <span className="font-mono text-base font-semibold text-primary">{patABO}{patRh === 'Positive' ? '+' : '-'}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-primary block mb-1">ชนิดเลือดที่สั่ง (Order แพทย์)</label>
+                    <select value={orderedComponent} onChange={e => { setOrderedComponent(e.target.value); setFormError(null) }}
+                            className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary">
+                      <option value="">เลือกชนิด...</option>
+                      {COMPONENTS.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ══ ค. บัตรคล้องถุงเลือด ══ */}
+          {wristbandOcr && !showChecklist && (
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">ค. บัตรคล้องถุงเลือด</p>
               {!bloodBagOcr ? (
                 <OcrScanner mode="bloodbag" onResult={handleBagOcrResult} />
               ) : (
@@ -285,56 +325,66 @@ export function PatientStep({ session, nurse1Name }: Props) {
             </div>
           )}
 
-          {/* ══ ค. สรุปเปรียบเทียบ ══ */}
-          {wristbandOcr && bloodBagOcr && (
-            <div className="border border-gray-200 rounded-lg overflow-hidden">
-              <div className="bg-gray-50 px-3 py-2 border-b border-gray-200">
-                <span className="text-xs font-medium text-gray-600">ตรวจสอบข้อมูลที่ตรงกัน</span>
-              </div>
-              <div className="p-3 space-y-2">
-                <div className="grid grid-cols-3 gap-2 text-xs text-gray-400 font-medium pb-1 border-b border-gray-100">
-                  <span></span>
-                  <span>สติ๊กเกอร์</span>
-                  <span>ถุงเลือด</span>
-                </div>
-                <div className="grid grid-cols-3 gap-2 items-start">
-                  <span className="text-xs text-gray-500 pt-0.5">ชื่อ-สกุล</span>
-                  <span className="text-xs font-medium text-gray-900 break-all">{wristbandOcr.name || '—'}</span>
-                  <div className="flex items-start gap-1">
-                    <span className="text-xs font-medium text-gray-900 break-all flex-1">{bloodBagOcr.patientName || '—'}</span>
-                    <span className={`text-sm flex-shrink-0 ${nameMatch ? 'text-success' : 'text-warning'}`}>
-                      {nameMatch ? '✅' : '⚠️'}
-                    </span>
+          {/* ══ ง. ตรวจสอบข้อมูลที่ตรงกัน ══ */}
+          {wristbandOcr && bloodBagOcr && !showChecklist && (
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">ง. ตรวจสอบข้อมูลที่ตรงกัน</p>
+              <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <div className="p-3 space-y-2">
+                  <div className="grid grid-cols-3 gap-2 text-xs text-gray-400 font-medium pb-1 border-b border-gray-100">
+                    <span></span>
+                    <span>สติ๊กเกอร์</span>
+                    <span>ถุงเลือด</span>
                   </div>
-                </div>
-                <div className="grid grid-cols-3 gap-2 items-center">
-                  <span className="text-xs text-gray-500">HN</span>
-                  <span className="text-sm font-mono font-semibold text-gray-900">{wristbandOcr.hn}</span>
-                  <div className="flex items-center gap-1">
-                    <span className="text-sm font-mono font-semibold text-gray-900 flex-1">{bloodBagOcr.patientHN || '—'}</span>
-                    <span className={`text-sm flex-shrink-0 ${hnMatch ? 'text-success' : 'text-danger'}`}>
-                      {hnMatch ? '✅' : '❌'}
-                    </span>
+                  <div className="grid grid-cols-3 gap-2 items-start">
+                    <span className="text-xs text-gray-500 pt-0.5">ชื่อ-สกุล</span>
+                    <span className="text-xs font-medium text-gray-900 break-all">{wristbandOcr.name || '—'}</span>
+                    <div className="flex items-start gap-1">
+                      <span className="text-xs font-medium text-gray-900 break-all flex-1">{bloodBagOcr.patientName || '—'}</span>
+                      <span className={`text-sm flex-shrink-0 ${nameMatch ? 'text-success' : 'text-warning'}`}>
+                        {nameMatch ? '✅' : '⚠️'}
+                      </span>
+                    </div>
                   </div>
+                  <div className="grid grid-cols-3 gap-2 items-center">
+                    <span className="text-xs text-gray-500">HN</span>
+                    <span className="text-sm font-mono font-semibold text-gray-900">{wristbandOcr.hn}</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm font-mono font-semibold text-gray-900 flex-1">{bloodBagOcr.patientHN || '—'}</span>
+                      <span className={`text-sm flex-shrink-0 ${hnMatch ? 'text-success' : 'text-danger'}`}>
+                        {hnMatch ? '✅' : '❌'}
+                      </span>
+                    </div>
+                  </div>
+                  {!nameMatch && (
+                    <p className="text-xs text-warning font-medium">⚠️ ชื่อ-สกุล ต่างกัน — กรุณาตรวจสอบอีกครั้ง</p>
+                  )}
+                  {hnMismatch && (
+                    <AlertBanner type="danger" title="HN ไม่ตรงกัน — ห้ามให้เลือดถุงนี้" />
+                  )}
                 </div>
-                {!nameMatch && (
-                  <p className="text-xs text-warning font-medium">⚠️ ชื่อ-สกุล ต่างกัน — กรุณาตรวจสอบอีกครั้ง</p>
-                )}
-                {hnMismatch && (
-                  <AlertBanner type="danger" title="HN ไม่ตรงกัน — ห้ามให้เลือดถุงนี้" />
-                )}
               </div>
+
+              {/* ── ปุ่มยืนยัน ── */}
+              {!hnMismatch && (
+                <div className="space-y-2 pt-1">
+                  {formError && <AlertBanner type="warning" title={formError} />}
+                  <button onClick={handleConfirm}
+                          className="w-full bg-primary hover:bg-primary-dark text-white text-sm font-medium py-3 rounded transition-colors">
+                    ยืนยัน → ตรวจสอบ Blood Group + ชนิดเลือด
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
-          {/* ══ ง-checklist: เตรียมความพร้อมก่อนให้เลือด ══ */}
-          {wristbandOcr && bloodBagOcr && showChecklist && !hnMismatch && (
+          {/* ══ checklist: เตรียมความพร้อมก่อนให้เลือด ══ */}
+          {showChecklist && !hnMismatch && (
             <div className="border border-warning rounded-lg overflow-hidden">
               <div className="bg-warning-light px-3 py-2 border-b border-warning">
                 <span className="text-xs font-medium text-warning">เตรียมความพร้อมก่อนไปให้เลือดผู้ป่วย</span>
               </div>
               <div className="divide-y divide-gray-100">
-                {/* row ป้ายมือ */}
                 <div
                   onClick={() => setCheckBand(v => !v)}
                   className="flex items-center gap-3 px-4 py-4 cursor-pointer active:bg-gray-50"
@@ -345,7 +395,6 @@ export function PatientStep({ session, nurse1Name }: Props) {
                   </div>
                   <span className="text-sm font-medium text-gray-900">เตรียมป้ายมือให้เลือด</span>
                 </div>
-                {/* row ใบยินยอม */}
                 <div
                   onClick={() => setCheckConsent(v => !v)}
                   className="flex items-center gap-3 px-4 py-4 cursor-pointer active:bg-gray-50"
@@ -367,55 +416,6 @@ export function PatientStep({ session, nurse1Name }: Props) {
                       : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
                 >
                   รับทราบ — ไปขั้นตอน 2
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* ══ ง. กรอกข้อมูลจาก chart ══ */}
-          {wristbandOcr && bloodBagOcr && !hnMismatch && !showChecklist && (
-            <div className="border border-primary rounded-lg overflow-hidden">
-              <div className="bg-primary-light px-4 py-2 border-b border-primary">
-                <span className="text-xs font-medium text-primary">กรอกข้อมูลจากแบบบันทึกการให้โลหิต</span>
-              </div>
-              <div className="p-4 space-y-4">
-
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-primary block">Blood Group ผู้ป่วย</label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <select value={patABO} onChange={e => { setPatABO(e.target.value); setFormError(null) }}
-                            className="w-full border border-gray-200 rounded px-3 py-2 text-sm font-mono focus:outline-none focus:border-primary">
-                      <option value="">ABO...</option>
-                      {ABO_GROUPS.map(g => <option key={g} value={g}>{g}</option>)}
-                    </select>
-                    <select value={patRh} onChange={e => { setPatRh(e.target.value); setFormError(null) }}
-                            className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary">
-                      <option value="">Rh...</option>
-                      {RH_OPTIONS.map(r => <option key={r} value={r}>{r === 'Positive' ? 'Positive (+)' : 'Negative (-)'}</option>)}
-                    </select>
-                  </div>
-                  {patABO && patRh && (
-                    <div className="flex justify-between items-center bg-primary-light rounded px-3 py-2">
-                      <span className="text-xs font-medium text-primary">Blood Group ผู้ป่วย</span>
-                      <span className="font-mono text-base font-semibold text-primary">{patABO}{patRh === 'Positive' ? '+' : '-'}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <label className="text-xs font-medium text-primary block mb-1">ชนิดเลือดที่สั่ง (Order แพทย์)</label>
-                  <select value={orderedComponent} onChange={e => { setOrderedComponent(e.target.value); setFormError(null) }}
-                          className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary">
-                    <option value="">เลือกชนิด...</option>
-                    {COMPONENTS.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-
-                {formError && <AlertBanner type="warning" title={formError} />}
-
-                <button onClick={handleConfirm}
-                        className="w-full bg-primary hover:bg-primary-dark text-white text-sm font-medium py-3 rounded transition-colors">
-                  ยืนยัน → ตรวจสอบ Blood Group + ชนิดเลือด
                 </button>
               </div>
             </div>
