@@ -84,6 +84,9 @@ export function PatientStep({ session, nurse1Name }: Props) {
   const [formError, setFormError]       = useState<string | null>(null)
   const [bgFail, setBgFail]             = useState(false)
   const [bgFailReason, setBgFailReason] = useState('')
+  const [showChecklist, setShowChecklist] = useState(false)
+  const [checkBand, setCheckBand]         = useState(false)
+  const [checkConsent, setCheckConsent]   = useState(false)
 
   // ── computed ──
   const hnMatch = wristbandOcr && bloodBagOcr
@@ -175,7 +178,7 @@ export function PatientStep({ session, nurse1Name }: Props) {
     session.setPatientBloodGroup(patientBG)
     session.setOrderedComponent(orderedComponent)
     session.setBloodBag(bag)
-    session.nextStep()
+    setShowChecklist(true)
   }
 
   function handleReset() {
@@ -184,6 +187,7 @@ export function PatientStep({ session, nurse1Name }: Props) {
     setPatABO(''); setPatRh(''); setOrderedComponent('')
     setHnMismatch(false); setFormError(null)
     setBgFail(false); setBgFailReason('')
+    setShowChecklist(false); setCheckBand(false); setCheckConsent(false)
   }
 
   return (
@@ -323,8 +327,53 @@ export function PatientStep({ session, nurse1Name }: Props) {
             </div>
           )}
 
+          {/* ══ ง-checklist: เตรียมความพร้อมก่อนให้เลือด ══ */}
+          {wristbandOcr && bloodBagOcr && showChecklist && !hnMismatch && (
+            <div className="border border-warning rounded-lg overflow-hidden">
+              <div className="bg-warning-light px-3 py-2 border-b border-warning">
+                <span className="text-xs font-medium text-warning">เตรียมความพร้อมก่อนไปขั้นตอนถัดไป</span>
+              </div>
+              <div className="divide-y divide-gray-100">
+                {/* row ป้ายมือ */}
+                <div
+                  onClick={() => setCheckBand(v => !v)}
+                  className="flex items-center gap-3 px-4 py-4 cursor-pointer active:bg-gray-50"
+                >
+                  <div className={`w-7 h-7 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors
+                    ${checkBand ? 'bg-success border-success' : 'border-gray-400'}`}>
+                    {checkBand && <span className="text-white text-base font-bold leading-none">✓</span>}
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">เตรียมป้ายมือให้เลือด</span>
+                </div>
+                {/* row ใบยินยอม */}
+                <div
+                  onClick={() => setCheckConsent(v => !v)}
+                  className="flex items-center gap-3 px-4 py-4 cursor-pointer active:bg-gray-50"
+                >
+                  <div className={`w-7 h-7 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors
+                    ${checkConsent ? 'bg-success border-success' : 'border-gray-400'}`}>
+                    {checkConsent && <span className="text-white text-base font-bold leading-none">✓</span>}
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">เตรียมใบยินยอมให้เลือด</span>
+                </div>
+              </div>
+              <div className="px-4 py-3">
+                <button
+                  onClick={() => { if (checkBand && checkConsent) session.nextStep() }}
+                  disabled={!(checkBand && checkConsent)}
+                  className={`w-full text-sm font-medium py-3 rounded transition-colors
+                    ${checkBand && checkConsent
+                      ? 'bg-primary hover:bg-primary-dark text-white'
+                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
+                >
+                  รับทราบ — ไปขั้นตอน 2
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* ══ ง. กรอกข้อมูลจาก chart ══ */}
-          {wristbandOcr && bloodBagOcr && !hnMismatch && (
+          {wristbandOcr && bloodBagOcr && !hnMismatch && !showChecklist && (
             <div className="border border-primary rounded-lg overflow-hidden">
               <div className="bg-primary-light px-4 py-2 border-b border-primary">
                 <span className="text-xs font-medium text-primary">กรอกข้อมูลจากแบบบันทึกการให้โลหิต</span>
