@@ -6,10 +6,12 @@ import type { BloodBagOcr } from '@/lib/ocr'
 interface WristbandProps {
   mode: 'wristband'
   onResult: (hn: string, name: string) => void
+  label?: string
 }
 interface BloodBagProps {
   mode: 'bloodbag'
   onResult: (data: BloodBagOcr) => void
+  label?: string
 }
 type Props = WristbandProps | BloodBagProps
 
@@ -43,6 +45,7 @@ function cropImageToBlob(
 }
 
 export function OcrScanner(props: Props) {
+  const buttonLabel = props.label ?? LABEL[props.mode]
   const [dataUrl, setDataUrl]         = useState<string | null>(null)
   const [cropTop, setCropTop]         = useState(0.15)
   const [cropBottom, setCropBottom]   = useState(0.55)
@@ -151,7 +154,7 @@ export function OcrScanner(props: Props) {
           onClick={() => { setError(null); setRawText(null); inputRef.current?.click() }}
           className="w-full bg-primary hover:bg-primary-dark text-white text-sm font-medium py-3 rounded transition-colors"
         >
-          📷 {LABEL[props.mode]}
+          📷 {buttonLabel}
         </button>
       )}
 

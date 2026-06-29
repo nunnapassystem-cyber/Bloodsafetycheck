@@ -125,7 +125,7 @@ export default function ScanPage() {
           )}
 
           {!step2Fail && !wristbandVerified && (
-            <OcrScanner mode="wristband" onResult={(hn) => handleWristbandScan(hn)} />
+            <OcrScanner mode="wristband" label="ถ่ายรูปสติ๊กเกอร์ชื่อผู้ป่วย (ป้ายข้อมือ)" onResult={(hn) => handleWristbandScan(hn)} />
           )}
 
           {!step2Fail && wristbandVerified && (
