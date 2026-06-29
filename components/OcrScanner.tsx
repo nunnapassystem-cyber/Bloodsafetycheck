@@ -77,7 +77,6 @@ function cropImageToBlob(
         Math.round(img.naturalHeight * crop.y),
         sw, sh, 0, 0, sw, sh,
       )
-      enhanceForOcr(canvas)
       canvas.toBlob(b => resolve(b!), 'image/jpeg', 0.92)
     }
     img.src = src
@@ -138,7 +137,11 @@ export function OcrScanner(props: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ image: base64 }),
       })
-      if (!res.ok) throw new Error('OCR API error')
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        setError(`OCR Error ${res.status}: ${body.error ?? 'unknown'}`)
+        return
+      }
       const { text } = await res.json()
       setRawText(text)
 
