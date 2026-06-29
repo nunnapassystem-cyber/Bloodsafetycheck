@@ -58,22 +58,20 @@ export function parseBloodBag(text: string): BloodBagOcr {
   const nameM = text.match(/(?:ชื่อ[^:：\n]{0,8}[:：]\s*)(.+)/)?.[1]?.trim() ?? null
 
   // ชนิดเลือด: LPRC, PRC, FFP, Platelet, WB
-  // OCR อาจอ่าน "LPRC" เป็น "L PRC" (มี space) → จับทั้งสองแบบ แล้วลบ space
-  const compRaw =
-    text.match(/\bLPRC\b/i)?.[0] ??
-    text.match(/\bL\s+PRC\b/i)?.[0] ??
-    text.match(/\bFFP\b/i)?.[0] ??
-    text.match(/\bPlatelet\b/i)?.[0] ??
-    text.match(/\bWB\b/i)?.[0] ??
-    text.match(/\bPRC\b/i)?.[0] ??   // PRC อยู่หลังสุด ไม่งั้นจับก่อน LPRC
-    null
-  const comp = compRaw?.replace(/\s+/g, '').toUpperCase() ?? null
+  // ใช้ L\s*P\s*R\s*C เพื่อรับทุกกรณีที่ OCR อาจใส่ space กลาง ("L PRC", "LP RC", "L P R C")
+  let comp: string | null = null
+  if (/L\s*P\s*R\s*C/i.test(text))  comp = 'LPRC'
+  else if (/\bFFP\b/i.test(text))   comp = 'FFP'
+  else if (/\bPlatelet\b/i.test(text)) comp = 'Platelet'
+  else if (/\bWB\b/i.test(text))    comp = 'WB'
+  else if (/\bPRC\b/i.test(text))   comp = 'PRC'
 
-  // Gr. : A  — blood group ถุงเลือด (ในกล่องชนิดเลือด)
-  // Fallback: หา "A Rh :" หรือ "AB Rh :" — blood group อยู่ก่อน Rh เสมอ
+  // Gr. : A  — blood group ถุงเลือด
+  // Fallback 1: "Gr. : A" หรือ "Gr, : A" (OCR อาจอ่าน period เป็น comma)
+  // Fallback 2: "A Rh :" — หา ABO ที่อยู่ก่อน Rh เสมอ
   const aboRaw =
-    text.match(/Gr\s*\.?\s*[:：]\s*([ABO]{1,2})\b/i)?.[1]?.toUpperCase() ??
-    text.match(/\b([ABO]{1,2})\s+Rh\s*[:：]/i)?.[1]?.toUpperCase() ??
+    text.match(/Gr\s*[.,]?\s*[:：]\s*([ABO]{1,2})\b/i)?.[1]?.toUpperCase() ??
+    text.match(/\b(AB|[ABO])\s+Rh\s*[:：]/i)?.[1]?.toUpperCase() ??
     null
   const abo = aboRaw === 'OO' ? 'O' : (aboRaw ?? null)
 
