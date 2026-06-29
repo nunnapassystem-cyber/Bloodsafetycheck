@@ -18,26 +18,66 @@ const LABEL = {
   bloodbag:  'ถ่ายรูปบัตรคล้องถุงเลือด',
 }
 
-export function OcrScanner(props: Props) {
-  const [progress, setProgress]     = useState<number | null>(null)
-  const [error, setError]           = useState<string | null>(null)
-  const [rawText, setRawText]       = useState<string | null>(null)
-  const [manualHN, setManualHN]     = useState('')
-  const [showManual, setShowManual] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
+function cropImageToBlob(
+  src: string,
+  crop: { x: number; y: number; w: number; h: number },
+): Promise<Blob> {
+  return new Promise(resolve => {
+    const img = new Image()
+    img.onload = () => {
+      const sw = Math.round(img.naturalWidth  * crop.w)
+      const sh = Math.round(img.naturalHeight * crop.h)
+      const canvas = document.createElement('canvas')
+      canvas.width = sw; canvas.height = sh
+      canvas.getContext('2d')!.drawImage(
+        img,
+        Math.round(img.naturalWidth  * crop.x),
+        Math.round(img.naturalHeight * crop.y),
+        sw, sh, 0, 0, sw, sh,
+      )
+      canvas.toBlob(b => resolve(b!), 'image/jpeg', 0.92)
+    }
+    img.src = src
+  })
+}
 
-  async function handleCapture(e: React.ChangeEvent<HTMLInputElement>) {
+export function OcrScanner(props: Props) {
+  const [dataUrl, setDataUrl]         = useState<string | null>(null)
+  const [cropTop, setCropTop]         = useState(0.15)
+  const [cropBottom, setCropBottom]   = useState(0.55)
+  const [progress, setProgress]       = useState<number | null>(null)
+  const [error, setError]             = useState<string | null>(null)
+  const [rawText, setRawText]         = useState<string | null>(null)
+  const [manualHN, setManualHN]       = useState('')
+  const [showManual, setShowManual]   = useState(false)
+  const inputRef    = useRef<HTMLInputElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  function handleCapture(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    setError(null)
-    setRawText(null)
-    setShowManual(false)
+    setError(null); setRawText(null); setShowManual(false)
+    const defaults = props.mode === 'wristband'
+      ? { top: 0.15, bottom: 0.55 }
+      : { top: 0.05, bottom: 0.85 }
+    setCropTop(defaults.top)
+    setCropBottom(defaults.bottom)
+    const reader = new FileReader()
+    reader.onload = () => setDataUrl(reader.result as string)
+    reader.readAsDataURL(file)
+    if (inputRef.current) inputRef.current.value = ''
+  }
+
+  async function handleCropConfirm() {
+    if (!dataUrl) return
+    setDataUrl(null)
     setProgress(0)
-
     try {
-      const text = await ocrImage(file, setProgress)
+      const blob = await cropImageToBlob(dataUrl, {
+        x: 0, y: cropTop, w: 1, h: cropBottom - cropTop,
+      })
+      const text = await ocrImage(blob as File, setProgress)
       setProgress(null)
-
       if (props.mode === 'wristband') {
         const result = parseWristband(text)
         if (!result) {
@@ -47,27 +87,22 @@ export function OcrScanner(props: Props) {
         }
         props.onResult(result.hn, result.name)
       } else {
-        const result = parseBloodBag(text)
-        props.onResult(result)
+        props.onResult(parseBloodBag(text))
       }
     } catch {
       setProgress(null)
       setError('อ่านรูปไม่ได้ — กรุณาถ่ายใหม่')
-    } finally {
-      if (inputRef.current) inputRef.current.value = ''
     }
   }
 
   function handleManualSubmit() {
     if (!manualHN.trim() || props.mode !== 'wristband') return
     props.onResult(manualHN.trim(), '')
-    setManualHN('')
-    setShowManual(false)
-    setError(null)
-    setRawText(null)
+    setManualHN(''); setShowManual(false); setError(null); setRawText(null)
   }
 
   const isProcessing = progress !== null
+  const isCropping   = dataUrl !== null && !isProcessing
 
   return (
     <div className="space-y-2">
@@ -80,7 +115,8 @@ export function OcrScanner(props: Props) {
         onChange={handleCapture}
       />
 
-      {!isProcessing && !showManual && (
+      {/* ── Idle: ปุ่มถ่ายรูป ── */}
+      {!isProcessing && !isCropping && !showManual && (
         <button
           onClick={() => { setError(null); setRawText(null); inputRef.current?.click() }}
           className="w-full bg-primary hover:bg-primary-dark text-white text-sm font-medium py-3 rounded transition-colors"
@@ -89,6 +125,86 @@ export function OcrScanner(props: Props) {
         </button>
       )}
 
+      {/* ── Crop UI ── */}
+      {isCropping && (
+        <div className="space-y-2">
+          <p className="text-xs text-gray-500 text-center">
+            ลากแถบ ▲▼ ให้ครอบเฉพาะข้อความ แล้วกด ตกลง
+          </p>
+
+          <div
+            ref={containerRef}
+            className="relative select-none overflow-hidden rounded"
+            style={{ touchAction: 'none' }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={dataUrl} className="w-full block" alt="" />
+
+            {/* mask บน */}
+            <div
+              className="absolute left-0 right-0 top-0 bg-black/50 pointer-events-none"
+              style={{ height: `${cropTop * 100}%` }}
+            />
+            {/* mask ล่าง */}
+            <div
+              className="absolute left-0 right-0 bottom-0 bg-black/50 pointer-events-none"
+              style={{ height: `${(1 - cropBottom) * 100}%` }}
+            />
+            {/* กรอบ crop */}
+            <div
+              className="absolute left-0 right-0 border-2 border-primary pointer-events-none"
+              style={{ top: `${cropTop * 100}%`, height: `${(cropBottom - cropTop) * 100}%` }}
+            />
+
+            {/* Handle บน */}
+            <div
+              className="absolute left-0 right-0 flex items-center justify-center"
+              style={{ top: `calc(${cropTop * 100}% - 16px)`, height: 32, cursor: 'ns-resize' }}
+              onTouchMove={e => {
+                e.preventDefault()
+                const rect = containerRef.current!.getBoundingClientRect()
+                const y = Math.max(0, Math.min(cropBottom - 0.08,
+                  (e.touches[0].clientY - rect.top) / rect.height))
+                setCropTop(y)
+              }}
+            >
+              <div className="w-10 h-2 bg-primary rounded-full opacity-90" />
+            </div>
+
+            {/* Handle ล่าง */}
+            <div
+              className="absolute left-0 right-0 flex items-center justify-center"
+              style={{ top: `calc(${cropBottom * 100}% - 16px)`, height: 32, cursor: 'ns-resize' }}
+              onTouchMove={e => {
+                e.preventDefault()
+                const rect = containerRef.current!.getBoundingClientRect()
+                const y = Math.max(cropTop + 0.08, Math.min(1,
+                  (e.touches[0].clientY - rect.top) / rect.height))
+                setCropBottom(y)
+              }}
+            >
+              <div className="w-10 h-2 bg-primary rounded-full opacity-90" />
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              onClick={handleCropConfirm}
+              className="flex-1 bg-primary hover:bg-primary-dark text-white text-sm font-medium py-3 rounded transition-colors"
+            >
+              ตกลง อ่านข้อความ
+            </button>
+            <button
+              onClick={() => { setDataUrl(null); inputRef.current?.click() }}
+              className="px-4 border border-gray-200 text-sm text-gray-500 py-3 rounded hover:border-gray-400 transition-colors"
+            >
+              ถ่ายใหม่
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Processing ── */}
       {isProcessing && (
         <div className="border border-primary rounded p-4 space-y-2">
           <p className="text-xs font-medium text-primary text-center">กำลังอ่านข้อมูล... {progress}%</p>
@@ -101,6 +217,7 @@ export function OcrScanner(props: Props) {
         </div>
       )}
 
+      {/* ── Error ── */}
       {error && !showManual && (
         <div className="space-y-2">
           <p className="text-xs text-danger font-medium">{error}</p>
@@ -129,6 +246,7 @@ export function OcrScanner(props: Props) {
         </div>
       )}
 
+      {/* ── Manual HN input ── */}
       {showManual && props.mode === 'wristband' && (
         <div className="space-y-2">
           <label className="text-xs font-medium text-gray-500 block">กรอก HN จากสติ๊กเกอร์ข้อมือ</label>
