@@ -45,23 +45,25 @@ export function OcrScanner(props: Props) {
   const [dataUrl, setDataUrl]         = useState<string | null>(null)
   const [cropTop, setCropTop]         = useState(0.15)
   const [cropBottom, setCropBottom]   = useState(0.55)
+  const [cropLeft, setCropLeft]       = useState(0)
+  const [cropRight, setCropRight]     = useState(1)
   const [progress, setProgress]       = useState<number | null>(null)
   const [error, setError]             = useState<string | null>(null)
   const [rawText, setRawText]         = useState<string | null>(null)
   const [manualHN, setManualHN]       = useState('')
   const [showManual, setShowManual]   = useState(false)
-  const inputRef    = useRef<HTMLInputElement>(null)
+  const inputRef     = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
   function handleCapture(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
     setError(null); setRawText(null); setShowManual(false)
-    const defaults = props.mode === 'wristband'
-      ? { top: 0.15, bottom: 0.55 }
-      : { top: 0.05, bottom: 0.85 }
-    setCropTop(defaults.top)
-    setCropBottom(defaults.bottom)
+    const d = props.mode === 'wristband'
+      ? { top: 0.15, bottom: 0.55, left: 0, right: 1 }
+      : { top: 0.05, bottom: 0.85, left: 0, right: 1 }
+    setCropTop(d.top); setCropBottom(d.bottom)
+    setCropLeft(d.left); setCropRight(d.right)
     const reader = new FileReader()
     reader.onload = () => setDataUrl(reader.result as string)
     reader.readAsDataURL(file)
@@ -74,7 +76,10 @@ export function OcrScanner(props: Props) {
     setProgress(0)
     try {
       const blob = await cropImageToBlob(dataUrl, {
-        x: 0, y: cropTop, w: 1, h: cropBottom - cropTop,
+        x: cropLeft,
+        y: cropTop,
+        w: cropRight - cropLeft,
+        h: cropBottom - cropTop,
       })
       const text = await ocrImage(blob as File, setProgress)
       setProgress(null)
@@ -115,7 +120,7 @@ export function OcrScanner(props: Props) {
         onChange={handleCapture}
       />
 
-      {/* ── Idle: ปุ่มถ่ายรูป ── */}
+      {/* ── Idle ── */}
       {!isProcessing && !isCropping && !showManual && (
         <button
           onClick={() => { setError(null); setRawText(null); inputRef.current?.click() }}
@@ -129,7 +134,7 @@ export function OcrScanner(props: Props) {
       {isCropping && (
         <div className="space-y-2">
           <p className="text-xs text-gray-500 text-center">
-            ลากแถบ ▲▼ ให้ครอบเฉพาะข้อความ แล้วกด ตกลง
+            ลากแถบรอบด้านให้ครอบเฉพาะข้อความ แล้วกด ตกลง
           </p>
 
           <div
@@ -140,50 +145,83 @@ export function OcrScanner(props: Props) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={dataUrl} className="w-full block" alt="" />
 
-            {/* mask บน */}
-            <div
-              className="absolute left-0 right-0 top-0 bg-black/50 pointer-events-none"
-              style={{ height: `${cropTop * 100}%` }}
-            />
-            {/* mask ล่าง */}
-            <div
-              className="absolute left-0 right-0 bottom-0 bg-black/50 pointer-events-none"
-              style={{ height: `${(1 - cropBottom) * 100}%` }}
-            />
-            {/* กรอบ crop */}
-            <div
-              className="absolute left-0 right-0 border-2 border-primary pointer-events-none"
-              style={{ top: `${cropTop * 100}%`, height: `${(cropBottom - cropTop) * 100}%` }}
-            />
+            {/* ── Masks ── */}
+            {/* บน */}
+            <div className="absolute left-0 right-0 top-0 bg-black/50 pointer-events-none"
+                 style={{ height: `${cropTop * 100}%` }} />
+            {/* ล่าง */}
+            <div className="absolute left-0 right-0 bottom-0 bg-black/50 pointer-events-none"
+                 style={{ height: `${(1 - cropBottom) * 100}%` }} />
+            {/* ซ้าย (ระหว่าง top–bottom) */}
+            <div className="absolute left-0 bg-black/50 pointer-events-none"
+                 style={{
+                   top: `${cropTop * 100}%`,
+                   height: `${(cropBottom - cropTop) * 100}%`,
+                   width: `${cropLeft * 100}%`,
+                 }} />
+            {/* ขวา (ระหว่าง top–bottom) */}
+            <div className="absolute right-0 bg-black/50 pointer-events-none"
+                 style={{
+                   top: `${cropTop * 100}%`,
+                   height: `${(cropBottom - cropTop) * 100}%`,
+                   width: `${(1 - cropRight) * 100}%`,
+                 }} />
 
-            {/* Handle บน */}
-            <div
-              className="absolute left-0 right-0 flex items-center justify-center"
-              style={{ top: `calc(${cropTop * 100}% - 16px)`, height: 32, cursor: 'ns-resize' }}
-              onTouchMove={e => {
-                e.preventDefault()
-                const rect = containerRef.current!.getBoundingClientRect()
-                const y = Math.max(0, Math.min(cropBottom - 0.08,
-                  (e.touches[0].clientY - rect.top) / rect.height))
-                setCropTop(y)
-              }}
-            >
+            {/* กรอบ crop สีฟ้า */}
+            <div className="absolute border-2 border-primary pointer-events-none"
+                 style={{
+                   top:    `${cropTop   * 100}%`,
+                   height: `${(cropBottom - cropTop)  * 100}%`,
+                   left:   `${cropLeft  * 100}%`,
+                   width:  `${(cropRight - cropLeft) * 100}%`,
+                 }} />
+
+            {/* ── Handle บน ── */}
+            <div className="absolute left-0 right-0 flex items-center justify-center"
+                 style={{ top: `calc(${cropTop * 100}% - 16px)`, height: 32, cursor: 'ns-resize' }}
+                 onTouchMove={e => {
+                   e.preventDefault()
+                   const rect = containerRef.current!.getBoundingClientRect()
+                   setCropTop(Math.max(0, Math.min(cropBottom - 0.08,
+                     (e.touches[0].clientY - rect.top) / rect.height)))
+                 }}>
               <div className="w-10 h-2 bg-primary rounded-full opacity-90" />
             </div>
 
-            {/* Handle ล่าง */}
-            <div
-              className="absolute left-0 right-0 flex items-center justify-center"
-              style={{ top: `calc(${cropBottom * 100}% - 16px)`, height: 32, cursor: 'ns-resize' }}
-              onTouchMove={e => {
-                e.preventDefault()
-                const rect = containerRef.current!.getBoundingClientRect()
-                const y = Math.max(cropTop + 0.08, Math.min(1,
-                  (e.touches[0].clientY - rect.top) / rect.height))
-                setCropBottom(y)
-              }}
-            >
+            {/* ── Handle ล่าง ── */}
+            <div className="absolute left-0 right-0 flex items-center justify-center"
+                 style={{ top: `calc(${cropBottom * 100}% - 16px)`, height: 32, cursor: 'ns-resize' }}
+                 onTouchMove={e => {
+                   e.preventDefault()
+                   const rect = containerRef.current!.getBoundingClientRect()
+                   setCropBottom(Math.max(cropTop + 0.08, Math.min(1,
+                     (e.touches[0].clientY - rect.top) / rect.height)))
+                 }}>
               <div className="w-10 h-2 bg-primary rounded-full opacity-90" />
+            </div>
+
+            {/* ── Handle ซ้าย ── */}
+            <div className="absolute top-0 bottom-0 flex items-center justify-center"
+                 style={{ left: `calc(${cropLeft * 100}% - 16px)`, width: 32, cursor: 'ew-resize' }}
+                 onTouchMove={e => {
+                   e.preventDefault()
+                   const rect = containerRef.current!.getBoundingClientRect()
+                   setCropLeft(Math.max(0, Math.min(cropRight - 0.05,
+                     (e.touches[0].clientX - rect.left) / rect.width)))
+                 }}>
+              <div className="h-10 w-2 bg-primary rounded-full opacity-90" />
+            </div>
+
+            {/* ── Handle ขวา ── */}
+            <div className="absolute top-0 bottom-0 flex items-center justify-center"
+                 style={{ left: `calc(${cropRight * 100}% - 16px)`, width: 32, cursor: 'ew-resize' }}
+                 onTouchMove={e => {
+                   e.preventDefault()
+                   const rect = containerRef.current!.getBoundingClientRect()
+                   setCropRight(Math.max(cropLeft + 0.05, Math.min(1,
+                     (e.touches[0].clientX - rect.left) / rect.width)))
+                 }}>
+              <div className="h-10 w-2 bg-primary rounded-full opacity-90" />
             </div>
           </div>
 
@@ -246,7 +284,7 @@ export function OcrScanner(props: Props) {
         </div>
       )}
 
-      {/* ── Manual HN input ── */}
+      {/* ── Manual HN ── */}
       {showManual && props.mode === 'wristband' && (
         <div className="space-y-2">
           <label className="text-xs font-medium text-gray-500 block">กรอก HN จากสติ๊กเกอร์ข้อมือ</label>

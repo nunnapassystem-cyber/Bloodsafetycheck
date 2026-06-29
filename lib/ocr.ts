@@ -41,18 +41,43 @@ export function parseWristband(text: string): WristbandOcr | null {
   return { hn, name: nameLine ?? '' }
 }
 
+// Blood bag card format (บัตรคล้องถุงเลือด):
+// ชื่อ/สกุล : พ.จ.อ.วัชระ พลอยงาม
+// HN : 0108858
+// LPRC    Gr. : A    Rh : POSITIVE
+// หมายเลขถุงเลือด : 302.69.0.04210
+// 265 mL.
 export function parseBloodBag(text: string): BloodBagOcr {
-  const hn     = text.match(/HN\s*[:：]\s*(\d{4,10})/i)?.[1] ?? null
-  const nameM  = text.match(/(?:ชื่อ[^:：\n]{0,6}[:：]\s*)(.+)/)?.[1]?.trim() ?? null
-  const comp   = text.match(/\b(LPRC|PRC|FFP|Platelet|WB)\b/i)?.[1]?.toUpperCase() ?? null
+  // HN — 7 digits preferred
+  const hn =
+    text.match(/HN\s*[:：]\s*(\d{7})/i)?.[1] ??
+    text.match(/HN\s*[:：]\s*(\d{4,10})/i)?.[1] ??
+    null
+
+  // ชื่อ/สกุล : or ชื่อ-สกุล : (up to 8 chars between ชื่อ and :)
+  const nameM = text.match(/(?:ชื่อ[^:：\n]{0,8}[:：]\s*)(.+)/)?.[1]?.trim() ?? null
+
+  // ชนิดเลือด: LPRC, PRC, FFP, Platelet, WB
+  const comp = text.match(/\b(LPRC|PRC|FFP|Platelet|WB)\b/i)?.[1]?.toUpperCase() ?? null
+
+  // Gr. : A  — blood group ถุงเลือด (ในกล่องชนิดเลือด)
   const aboRaw = text.match(/Gr\s*\.?\s*[:：]\s*([ABOO]{1,2})\b/i)?.[1]?.toUpperCase()
   const abo    = aboRaw === 'OO' ? 'O' : (aboRaw ?? null)
-  const rhRaw  = text.match(/Rh\s*[:：]\s*(POSITIVE|NEGATIVE)/i)?.[1] ?? null
-  const rh     = rhRaw ? (rhRaw.toUpperCase() === 'POSITIVE' ? 'Positive' : 'Negative') : null
-  const bagId  = text.match(/ถุงเลือด\s*[:：]\s*([\d.]+)/)?.[1]
-    ?? text.match(/\b(\d{10,13})\b/)?.[1]
-    ?? null
-  const vol    = text.match(/(\d{2,4})\s*mL/i)?.[1]
+
+  // Rh : POSITIVE — ในกล่องชนิดเลือด มี space ก่อน : (vs "Rh:" ที่ Patient Bl.gr ไม่มี space)
+  const rhRaw =
+    text.match(/Rh\s+[:：]\s*(POSITIVE|NEGATIVE)/i)?.[1] ??  // "Rh : POSITIVE" (ชนิดเลือด section)
+    text.match(/Rh[:：]\s*(POSITIVE|NEGATIVE)/i)?.[1]         // "Rh: POSITIVE" fallback
+  const rh = rhRaw ? (rhRaw.toUpperCase() === 'POSITIVE' ? 'Positive' : 'Negative') : null
+
+  // หมายเลขถุงเลือด : 302.69.0.04210  (รูปแบบมีจุด ไม่ใช่ตัวเลขล้วน)
+  const bagId =
+    text.match(/หมายเลขถุงเลือด\s*[:：]\s*([\d.]+)/)?.[1] ??
+    text.match(/ถุงเลือด\s*[:：]\s*([\d.]+)/)?.[1] ??
+    null
+
+  // 265 mL.
+  const vol = text.match(/(\d{2,4})\s*mL/i)?.[1]
   return {
     patientHN: hn, patientName: nameM, component: comp, abo, rh, bagId,
     volumeMl: vol ? parseInt(vol) : null,
