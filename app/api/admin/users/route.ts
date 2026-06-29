@@ -106,6 +106,28 @@ export async function PATCH(request: Request) {
   return NextResponse.json({ ok: true })
 }
 
+export async function DELETE(request: Request) {
+  const supabase = await createServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user || user.user_metadata?.role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  const { userId } = await request.json()
+  if (!userId) return NextResponse.json({ error: 'กรุณาระบุ userId' }, { status: 400 })
+  if (userId === user.id) return NextResponse.json({ error: 'ไม่สามารถลบตัวเองได้' }, { status: 400 })
+
+  const adminClient = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  )
+
+  const { error } = await adminClient.auth.admin.deleteUser(userId)
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+  return NextResponse.json({ ok: true })
+}
+
 export async function GET() {
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()

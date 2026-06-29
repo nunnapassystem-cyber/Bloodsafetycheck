@@ -56,6 +56,8 @@ export default function AdminPage() {
   const [editing, setEditing] = useState(false)
 
   const [wardSettings, setWardSettings] = useState<Map<string, boolean>>(new Map())
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   function openEdit(n: NurseUser) {
     setEditUserId(n.id)
@@ -131,6 +133,19 @@ export default function AdminPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ward_id: wardId, enabled: next }),
     })
+  }
+
+  async function handleDeleteUser(userId: string) {
+    setDeleting(true)
+    const res = await fetch('/api/admin/users', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId }),
+    })
+    setDeleting(false)
+    setConfirmDeleteId(null)
+    setEditUserId(null)
+    if (res.ok) fetchNurses()
   }
 
   useEffect(() => {
@@ -514,6 +529,33 @@ export default function AdminPage() {
                                     </div>
                                     {editMsg?.id === n.id && (
                                       <p className={`text-xs font-medium ${editMsg.ok ? 'text-success' : 'text-danger'}`}>{editMsg.text}</p>
+                                    )}
+                                    {confirmDeleteId === n.id ? (
+                                      <div className="flex items-center gap-2 pt-1 border-t border-danger/20">
+                                        <span className="text-xs text-danger font-medium">ยืนยันลบ {n.nurse_name} ?</span>
+                                        <button
+                                          onClick={() => handleDeleteUser(n.id)}
+                                          disabled={deleting}
+                                          className="bg-danger text-white text-xs font-medium px-3 py-1 rounded disabled:opacity-50"
+                                        >
+                                          {deleting ? '...' : 'ลบเลย'}
+                                        </button>
+                                        <button
+                                          onClick={() => setConfirmDeleteId(null)}
+                                          className="text-xs text-gray-500 underline"
+                                        >
+                                          ยกเลิก
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <div className="pt-1 border-t border-gray-200">
+                                        <button
+                                          onClick={() => setConfirmDeleteId(n.id)}
+                                          className="text-xs text-danger underline"
+                                        >
+                                          ลบชื่อออกจากระบบ
+                                        </button>
+                                      </div>
                                     )}
                                   </td>
                                 </tr>
