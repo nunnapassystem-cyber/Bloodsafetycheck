@@ -211,9 +211,9 @@ export function PatientStep({ session, nurse1Name }: Props) {
       {!bgFail && (
         <div className="space-y-4">
 
-          {/* ══ ก. สติ๊กเกอร์ข้อมือ ══ */}
+          {/* ══ ก. สติ๊กเกอร์ชื่อผู้ป่วย ══ */}
           <div className="space-y-2">
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">ก. สติ๊กเกอร์ข้อมือ</p>
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">ก. สติ๊กเกอร์ชื่อผู้ป่วย (หน้า Order สั่งให้เลือด)</p>
             {!wristbandOcr ? (
               <OcrScanner
                 mode="wristband"
