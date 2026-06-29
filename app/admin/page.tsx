@@ -55,6 +55,8 @@ export default function AdminPage() {
   const [editMsg, setEditMsg] = useState<{ id: string; ok: boolean; text: string } | null>(null)
   const [editing, setEditing] = useState(false)
 
+  const [wardSettings, setWardSettings] = useState<Map<string, boolean>>(new Map())
+
   function openEdit(n: NurseUser) {
     setEditUserId(n.id)
     setEditName(n.nurse_name)
@@ -113,9 +115,27 @@ export default function AdminPage() {
     setNurseLoading(false)
   }, [])
 
+  const fetchWardSettings = useCallback(async () => {
+    const res = await fetch('/api/admin/wards')
+    const data = await res.json()
+    if (Array.isArray(data)) {
+      setWardSettings(new Map(data.map((d: { ward_id: string; enabled: boolean }) => [d.ward_id, d.enabled])))
+    }
+  }, [])
+
+  async function toggleWard(wardId: string) {
+    const next = !wardSettings.get(wardId)
+    setWardSettings(prev => new Map(prev).set(wardId, next))
+    await fetch('/api/admin/wards', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ward_id: wardId, enabled: next }),
+    })
+  }
+
   useEffect(() => {
-    if (showUserMgmt) fetchNurses()
-  }, [showUserMgmt, fetchNurses])
+    if (showUserMgmt) { fetchNurses(); fetchWardSettings() }
+  }, [showUserMgmt, fetchNurses, fetchWardSettings])
 
   async function handleCreateUser() {
     setCreateError(null)
@@ -236,37 +256,58 @@ export default function AdminPage() {
                     const nurseCount = wardUsers.filter(n => n.role !== 'admin').length
                     const hasUser = wardUsers.length > 0
                     const isSelected = selectedCoverageWard === w.id
+                    const isEnabled = wardSettings.get(w.id) ?? false
                     return hasUser ? (
-                      <button
+                      <div
                         key={w.id}
-                        onClick={() => setSelectedCoverageWard(isSelected ? null : w.id)}
-                        className={`flex items-center justify-between rounded px-3 py-2 text-xs border text-left w-full transition-colors ${isSelected ? 'border-success bg-success text-white' : 'border-success bg-success-light'}`}
+                        className={`flex items-center justify-between rounded px-3 py-2 text-xs border transition-colors ${isSelected ? 'border-success bg-success' : 'border-success bg-success-light'}`}
                       >
-                        <span className={`font-medium ${isSelected ? 'text-white' : 'text-success'}`}>
-                          ✅ {w.name}
-                        </span>
-                        <span className={`font-mono text-right ${isSelected ? 'text-white' : 'text-success'}`}>
-                          {adminCount > 0 && <span>{adminCount}A </span>}
-                          {nurseCount > 0 && <span>{nurseCount}N</span>}
-                        </span>
-                      </button>
+                        <button
+                          onClick={() => setSelectedCoverageWard(isSelected ? null : w.id)}
+                          className="flex items-center gap-1 flex-1 text-left"
+                        >
+                          <span className={`font-medium ${isSelected ? 'text-white' : 'text-success'}`}>
+                            ✅ {w.name}
+                          </span>
+                          <span className={`font-mono ${isSelected ? 'text-white' : 'text-success'}`}>
+                            {adminCount > 0 && <span> {adminCount}A</span>}
+                            {nurseCount > 0 && <span> {nurseCount}N</span>}
+                          </span>
+                        </button>
+                        <button
+                          onClick={e => { e.stopPropagation(); toggleWard(w.id) }}
+                          title={isEnabled ? 'แสดงใน Login (คลิกเพื่อซ่อน)' : 'ซ่อนจาก Login (คลิกเพื่อเปิด)'}
+                          className={`relative inline-flex h-5 w-9 flex-shrink-0 rounded-full transition-colors ml-2 ${isEnabled ? 'bg-primary' : 'bg-gray-300'}`}
+                        >
+                          <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform mt-0.5 ${isEnabled ? 'translate-x-4' : 'translate-x-0.5'}`} />
+                        </button>
+                      </div>
                     ) : (
                       <div
                         key={w.id}
                         className="flex items-center justify-between rounded px-3 py-2 text-xs border border-danger bg-danger-light"
                       >
                         <span className="font-medium text-danger">⚠️ {w.name}</span>
-                        <button
-                          onClick={() => {
-                            setNewWardId(w.id)
-                            setCreateError(null)
-                            setCreateSuccess(false)
-                            createFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                          }}
-                          className="text-danger font-semibold underline"
-                        >
-                          เพิ่ม
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              setNewWardId(w.id)
+                              setCreateError(null)
+                              setCreateSuccess(false)
+                              createFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                            }}
+                            className="text-danger font-semibold underline"
+                          >
+                            เพิ่ม
+                          </button>
+                          <button
+                            onClick={() => toggleWard(w.id)}
+                            title={isEnabled ? 'แสดงใน Login (คลิกเพื่อซ่อน)' : 'ซ่อนจาก Login (คลิกเพื่อเปิด)'}
+                            className={`relative inline-flex h-5 w-9 flex-shrink-0 rounded-full transition-colors ${isEnabled ? 'bg-primary' : 'bg-gray-300'}`}
+                          >
+                            <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform mt-0.5 ${isEnabled ? 'translate-x-4' : 'translate-x-0.5'}`} />
+                          </button>
+                        </div>
                       </div>
                     )
                   })}

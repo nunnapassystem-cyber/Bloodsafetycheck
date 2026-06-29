@@ -17,8 +17,21 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [nurseLoading, setNurseLoading] = useState(false)
+  const [enabledWardIds, setEnabledWardIds] = useState<Set<string>>(
+    new Set(['ward-G', 'ward-H', 'ward-I'])
+  )
   const router = useRouter()
   const supabase = createClient()
+
+  useEffect(() => {
+    fetch('/api/admin/wards')
+      .then(r => r.json())
+      .then((data: { ward_id: string; enabled: boolean }[]) => {
+        if (Array.isArray(data))
+          setEnabledWardIds(new Set(data.filter(d => d.enabled).map(d => d.ward_id)))
+      })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     if (!wardId) { setNurses([]); setSelectedEmail(''); return }
@@ -72,9 +85,12 @@ export default function LoginPage() {
               className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary"
             >
               <option value="">เลือก Ward...</option>
-              {WARDS.map(w => (
-                <option key={w.id} value={w.id}>{w.name}</option>
-              ))}
+              {WARDS
+                .filter(w => w.id === 'admin' || enabledWardIds.has(w.id))
+                .map(w => (
+                  <option key={w.id} value={w.id}>{w.name}</option>
+                ))
+              }
             </select>
           </div>
 
