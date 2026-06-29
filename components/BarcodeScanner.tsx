@@ -1,6 +1,5 @@
 'use client'
-import { useEffect, useRef, useState, useId, useCallback } from 'react'
-import type { Html5Qrcode } from 'html5-qrcode'
+import { useEffect, useRef, useState, useCallback } from 'react'
 
 interface Props {
   onScan: (text: string) => void
@@ -12,17 +11,13 @@ export function BarcodeScanner({ onScan, label }: Props) {
   const [manual, setManual] = useState(false)
   const [manualInput, setManualInput] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const scannerRef = useRef<Html5Qrcode | null>(null)
-  const rawId = useId()
-  const uid = 'qr' + rawId.replace(/:/g, '')
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const controlsRef = useRef<{ stop: () => void } | null>(null)
 
-  const stopScan = useCallback(async () => {
-    if (scannerRef.current) {
-      try {
-        await scannerRef.current.stop()
-        scannerRef.current.clear()
-      } catch {}
-      scannerRef.current = null
+  const stopScan = useCallback(() => {
+    if (controlsRef.current) {
+      try { controlsRef.current.stop() } catch {}
+      controlsRef.current = null
     }
     setScanning(false)
   }, [])
@@ -32,31 +27,26 @@ export function BarcodeScanner({ onScan, label }: Props) {
     let cancelled = false
 
     async function init() {
-      const { Html5Qrcode, Html5QrcodeSupportedFormats } = await import('html5-qrcode')
-      if (cancelled) return
+      if (!videoRef.current) return
+      const { BrowserMultiFormatReader } = await import('@zxing/browser')
+      if (cancelled || !videoRef.current) return
       try {
-        const scanner = new Html5Qrcode(uid, {
-          verbose: false,
-          formatsToSupport: [
-            Html5QrcodeSupportedFormats.CODE_128,
-            Html5QrcodeSupportedFormats.CODE_39,
-            Html5QrcodeSupportedFormats.EAN_13,
-            Html5QrcodeSupportedFormats.EAN_8,
-            Html5QrcodeSupportedFormats.QR_CODE,
-            Html5QrcodeSupportedFormats.PDF_417,
-            Html5QrcodeSupportedFormats.ITF,
-            Html5QrcodeSupportedFormats.DATA_MATRIX,
-          ],
-        })
-        scannerRef.current = scanner
-        await scanner.start(
-          { facingMode: 'environment' },
-          { fps: 15, qrbox: { width: 300, height: 100 } },
-          (text: string) => {
-            if (!cancelled) { stopScan(); onScan(text) }
-          },
-          undefined
+        const reader = new BrowserMultiFormatReader()
+        const controls = await reader.decodeFromConstraints(
+          { video: { facingMode: 'environment' } },
+          videoRef.current,
+          (result) => {
+            if (result && !cancelled) {
+              stopScan()
+              onScan(result.getText())
+            }
+          }
         )
+        if (!cancelled) {
+          controlsRef.current = controls
+        } else {
+          controls.stop()
+        }
       } catch {
         if (!cancelled) {
           setScanning(false)
@@ -66,10 +56,16 @@ export function BarcodeScanner({ onScan, label }: Props) {
     }
 
     init()
-    return () => { cancelled = true; stopScan() }
-  }, [scanning]) // eslint-disable-line react-hooks/exhaustive-deps
+    return () => {
+      cancelled = true
+      if (controlsRef.current) {
+        try { controlsRef.current.stop() } catch {}
+        controlsRef.current = null
+      }
+    }
+  }, [scanning, stopScan, onScan])
 
-  useEffect(() => () => { stopScan() }, [stopScan])
+  useEffect(() => () => stopScan(), [stopScan])
 
   function handleManualSubmit() {
     if (!manualInput.trim()) return
@@ -99,7 +95,14 @@ export function BarcodeScanner({ onScan, label }: Props) {
 
       {scanning && (
         <div className="space-y-2">
-          <div id={uid} className="w-full rounded overflow-hidden" />
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            playsInline
+            className="w-full rounded border border-gray-200"
+            style={{ maxHeight: 360 }}
+          />
           <button
             onClick={stopScan}
             className="w-full border border-gray-200 text-sm text-gray-500 py-2 rounded hover:border-gray-400 transition-colors"
