@@ -1,71 +1,70 @@
 'use client'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 
 interface Props {
   onScan: (text: string) => void
   label: string
 }
 
+declare class BarcodeDetector {
+  constructor(options: { formats: string[] })
+  detect(source: HTMLVideoElement): Promise<Array<{ rawValue: string }>>
+}
+
+const FORMATS = ['code_128', 'code_39', 'ean_13', 'ean_8', 'qr_code', 'pdf417', 'itf', 'data_matrix', 'aztec']
+
 export function BarcodeScanner({ onScan, label }: Props) {
-  const [processing, setProcessing] = useState(false)
+  const supportsNativeScan = typeof window !== 'undefined' && 'BarcodeDetector' in window
+
+  const [scanning, setScanning] = useState(false)
   const [manual, setManual] = useState(false)
   const [manualInput, setManualInput] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const streamRef = useRef<MediaStream | null>(null)
+  const rafRef = useRef<number | null>(null)
+  const detectorRef = useRef<BarcodeDetector | null>(null)
 
-  async function handleCapture(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setProcessing(true)
+  const stopScan = useCallback(() => {
+    if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null }
+    if (streamRef.current) { streamRef.current.getTracks().forEach(t => t.stop()); streamRef.current = null }
+    if (videoRef.current) videoRef.current.srcObject = null
+    setScanning(false)
+  }, [])
+
+  function scanLoop() {
+    async function detect() {
+      if (!videoRef.current || !streamRef.current || !detectorRef.current) return
+      if (videoRef.current.readyState >= 2) {
+        try {
+          const results = await detectorRef.current.detect(videoRef.current)
+          if (results.length > 0) { stopScan(); onScan(results[0].rawValue); return }
+        } catch {}
+      }
+      rafRef.current = requestAnimationFrame(detect)
+    }
+    rafRef.current = requestAnimationFrame(detect)
+  }
+
+  async function startScan() {
     setError(null)
-
-    const url = URL.createObjectURL(file)
+    setScanning(true)
     try {
-      const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-        const image = new Image()
-        image.onload = () => resolve(image)
-        image.onerror = reject
-        image.src = url
-      })
-
-      // Draw to canvas at capped size for performance
-      const maxDim = 1600
-      const scale = Math.min(1, maxDim / Math.max(img.naturalWidth || img.width, img.naturalHeight || img.height))
-      const canvas = document.createElement('canvas')
-      canvas.width = Math.round((img.naturalWidth || img.width) * scale)
-      canvas.height = Math.round((img.naturalHeight || img.height) * scale)
-      const ctx = canvas.getContext('2d')!
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-
-      const [{ BrowserMultiFormatReader }, { DecodeHintType, BarcodeFormat }] = await Promise.all([
-        import('@zxing/browser'),
-        import('@zxing/library'),
-      ])
-
-      const hints = new Map()
-      hints.set(DecodeHintType.POSSIBLE_FORMATS, [
-        BarcodeFormat.CODE_128,
-        BarcodeFormat.CODE_39,
-        BarcodeFormat.EAN_13,
-        BarcodeFormat.EAN_8,
-        BarcodeFormat.QR_CODE,
-        BarcodeFormat.PDF_417,
-        BarcodeFormat.ITF,
-        BarcodeFormat.DATA_MATRIX,
-      ])
-      hints.set(DecodeHintType.TRY_HARDER, true)
-
-      const reader = new BrowserMultiFormatReader(hints)
-      const result = reader.decodeFromCanvas(canvas)
-      onScan(result.getText())
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      streamRef.current = stream
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+        await videoRef.current.play()
+      }
+      detectorRef.current = new BarcodeDetector({ formats: FORMATS })
+      scanLoop()
     } catch {
-      setError('ไม่พบ Barcode — กรุณาถ่ายใหม่ หรือกรอกรหัสด้วยมือ')
-    } finally {
-      setProcessing(false)
-      URL.revokeObjectURL(url)
-      if (inputRef.current) inputRef.current.value = ''
+      setScanning(false)
+      setError('ไม่สามารถเปิดกล้องได้ — กรุณากรอก HN ด้วยมือ')
     }
   }
+
+  useEffect(() => () => stopScan(), [stopScan])
 
   function handleManualSubmit() {
     if (!manualInput.trim()) return
@@ -74,75 +73,84 @@ export function BarcodeScanner({ onScan, label }: Props) {
     setManual(false)
   }
 
-  if (manual) {
+  // Manual input view (shared by both iOS and Android fallback)
+  if (manual || !supportsNativeScan) {
     return (
       <div className="space-y-2">
+        <label className="text-xs font-medium text-gray-500 block">
+          กรอก HN จากสติ๊กเกอร์ข้อมือ
+        </label>
         <input
           type="text"
+          inputMode="numeric"
           value={manualInput}
           onChange={e => setManualInput(e.target.value)}
-          placeholder="กรอกรหัส Barcode..."
-          className="w-full border border-gray-200 rounded px-3 py-2 text-sm font-mono focus:outline-none focus:border-primary"
+          placeholder="เช่น 0051422"
+          className="w-full border border-primary rounded px-3 py-2 text-sm font-mono focus:outline-none focus:border-primary"
           onKeyDown={e => e.key === 'Enter' && handleManualSubmit()}
           autoFocus
         />
         <div className="flex gap-2">
           <button
             onClick={handleManualSubmit}
-            className="flex-1 bg-primary hover:bg-primary-dark text-white text-sm font-medium py-2 rounded transition-colors"
+            disabled={!manualInput.trim()}
+            className="flex-1 bg-primary hover:bg-primary-dark text-white text-sm font-medium py-2 rounded transition-colors disabled:opacity-40"
           >
-            ยืนยัน
+            ยืนยัน HN
           </button>
-          <button
-            onClick={() => { setManual(false); setManualInput('') }}
-            className="px-4 border border-gray-200 text-sm text-gray-500 py-2 rounded hover:border-gray-400 transition-colors"
-          >
-            ยกเลิก
-          </button>
+          {supportsNativeScan && (
+            <button
+              onClick={() => { setManual(false); setManualInput('') }}
+              className="px-4 border border-gray-200 text-sm text-gray-500 py-2 rounded hover:border-gray-400 transition-colors"
+            >
+              ยกเลิก
+            </button>
+          )}
         </div>
       </div>
     )
   }
 
+  // Live scan view (Android Chrome / desktop Chrome)
   return (
     <div className="space-y-3">
-      {/* Hidden file input — triggers native camera */}
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="hidden"
-        onChange={handleCapture}
-      />
-
-      <div className="flex gap-2">
-        <button
-          onClick={() => { setError(null); inputRef.current?.click() }}
-          disabled={processing}
-          className="flex-1 bg-primary hover:bg-primary-dark text-white text-sm font-medium py-3 rounded transition-colors disabled:opacity-60"
-        >
-          {processing ? 'กำลังอ่าน Barcode...' : label}
-        </button>
-        <button
-          onClick={() => { setError(null); setManual(true) }}
-          className="px-3 py-3 border border-gray-200 rounded text-xs text-gray-500 hover:border-gray-400 transition-colors"
-        >
-          กรอกรหัสด้วยมือ
-        </button>
-      </div>
-
-      {error && (
-        <div className="space-y-2">
-          <p className="text-xs text-danger font-medium">{error}</p>
+      {!scanning && (
+        <div className="flex gap-2">
           <button
-            onClick={() => { setError(null); inputRef.current?.click() }}
-            className="w-full border border-danger text-danger text-xs py-2 rounded"
+            onClick={startScan}
+            className="flex-1 bg-primary hover:bg-primary-dark text-white text-sm font-medium py-3 rounded transition-colors"
           >
-            ถ่ายรูปใหม่
+            {label}
+          </button>
+          <button
+            onClick={() => setManual(true)}
+            className="px-3 py-3 border border-gray-200 rounded text-xs text-gray-500 hover:border-gray-400 transition-colors"
+          >
+            กรอกรหัสด้วยมือ
           </button>
         </div>
       )}
+
+      {scanning && (
+        <div className="space-y-2">
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            playsInline
+            className="w-full rounded border border-gray-200"
+            style={{ maxHeight: 360 }}
+          />
+          <button
+            onClick={stopScan}
+            className="w-full border border-gray-200 text-sm text-gray-500 py-2 rounded hover:border-gray-400 transition-colors"
+          >
+            ยกเลิก
+          </button>
+        </div>
+      )}
+
+      {error && <p className="text-xs text-danger font-medium">{error}</p>}
     </div>
   )
 }
