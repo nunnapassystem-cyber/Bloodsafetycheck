@@ -61,7 +61,7 @@ export function OcrScanner(props: Props) {
     setError(null); setRawText(null); setShowManual(false)
     const d = props.mode === 'wristband'
       ? { top: 0.15, bottom: 0.55, left: 0, right: 1 }
-      : { top: 0.05, bottom: 0.85, left: 0, right: 1 }
+      : { top: 0.28, bottom: 0.73, left: 0, right: 1 }
     setCropTop(d.top); setCropBottom(d.bottom)
     setCropLeft(d.left); setCropRight(d.right)
     const reader = new FileReader()
