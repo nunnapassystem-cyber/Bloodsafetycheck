@@ -202,8 +202,8 @@
     <div class="toc-item"><span class="num">1.</span> การเข้าสู่ระบบ <span class="dots"></span> 3</div>
     <div class="toc-item"><span class="num">2.</span> ขั้นตอนที่ 1 — ตรวจ Order + ถุงเลือด (ก–ง) <span class="dots"></span> 3</div>
     <div class="toc-item"><span class="num">3.</span> ผลการตรวจสอบ Blood Group (PASS / FAIL) <span class="dots"></span> 4</div>
-    <div class="toc-item"><span class="num">4.</span> ขั้นตอนที่ 2 — ยืนยันด้วยพยาบาล 2 คน <span class="dots"></span> 5</div>
-    <div class="toc-item"><span class="num">5.</span> ขั้นตอนที่ 3 — บันทึกสำเร็จ / แชร์ LINE <span class="dots"></span> 5</div>
+    <div class="toc-item"><span class="num">4.</span> ขั้นตอนที่ 2 — ตรวจที่เตียงผู้ป่วย <span class="dots"></span> 5</div>
+    <div class="toc-item"><span class="num">5.</span> ขั้นตอนที่ 3 — ยืนยัน 2 พยาบาล &amp; บันทึกสำเร็จ <span class="dots"></span> 5</div>
     <div class="toc-item"><span class="num">6.</span> Session Timeout &amp; เคล็ดลับ OCR <span class="dots"></span> 5</div>
   </div>
 
@@ -235,12 +235,12 @@
     <div class="flow-arrow">→</div>
     <div class="flow-box">
       <div class="fb-num">ขั้นตอนที่ 2</div>
-      <div class="fb-title">ยืนยัน 2 พยาบาล</div>
+      <div class="fb-title">ตรวจที่เตียงผู้ป่วย</div>
     </div>
     <div class="flow-arrow">→</div>
     <div class="flow-box">
       <div class="fb-num">ขั้นตอนที่ 3</div>
-      <div class="fb-title">บันทึกสำเร็จ</div>
+      <div class="fb-title">ยืนยัน 2 พยาบาล</div>
     </div>
   </div>
 
@@ -269,12 +269,12 @@
   <div class="sub-card no-break">
     <div class="sub-header">
       <span class="sub-badge">ก</span>
-      <span class="sub-title">ถ่ายรูปสติ๊กเกอร์ข้อมือ</span>
+      <span class="sub-title">สติ๊กเกอร์ชื่อผู้ป่วย (หน้า Order สั่งให้เลือด)</span>
     </div>
     <div class="sub-body">
       <ol>
-        <li>กด <strong>"ถ่ายรูปสติ๊กเกอร์ข้อมือ"</strong> → กล้องเปิด</li>
-        <li>ถ่ายรูปสติ๊กเกอร์ที่ข้อมือผู้ป่วย</li>
+        <li>กด <strong>"ถ่ายรูปสติ๊กเกอร์ชื่อผู้ป่วย"</strong> → กล้องเปิด</li>
+        <li>ถ่ายรูปสติ๊กเกอร์ชื่อผู้ป่วยบนหน้า Order สั่งให้เลือด</li>
         <li>ปรับกรอบตัดให้ครอบข้อความ → กด <strong>"ตกลง อ่านข้อความ"</strong></li>
         <li>ระบบอ่าน HN และชื่อผู้ป่วยอัตโนมัติ — แสดงในกล่องสีน้ำเงิน</li>
         <li>แก้ไขได้โดยตรงถ้า OCR อ่านผิด</li>
@@ -363,26 +363,44 @@
   </div>
 
   <!-- STEP 2 -->
-  <h3>4. ขั้นตอนที่ 2 — ยืนยันด้วยพยาบาล 2 คน</h3>
+  <h3>4. ขั้นตอนที่ 2 — ตรวจที่เตียงผู้ป่วย</h3>
   <div class="step-card no-break">
     <div class="step-body">
       <ol>
-        <li>ตรวจสอบสรุปข้อมูลทั้งหมดอีกครั้ง</li>
-        <li><strong>พยาบาลคนที่ 1</strong> — แสดงชื่ออัตโนมัติจาก Login (ไม่ต้องกรอก)</li>
-        <li><strong>พยาบาลคนที่ 2</strong> — กรอกชื่อพยาบาลที่มายืนยันร่วม (ต้องเป็นคนละคน)</li>
-        <li>กด <strong>"ยืนยันเริ่มให้เลือด — บันทึกเวลา"</strong></li>
+        <li>ติ๊ก <strong>"สอบถามชื่อ-สกุลผู้ป่วยก่อนให้การพยาบาลแล้ว"</strong> → ปุ่มถ่ายรูปปรากฏ</li>
+        <li>กด <strong>"ถ่ายรูปสติ๊กเกอร์ชื่อผู้ป่วย (ป้ายข้อมือ)"</strong> → ถ่ายสติ๊กเกอร์ที่ข้อมือผู้ป่วย</li>
+        <li>ปรับกรอบตัดให้ครอบข้อความ → กด <strong>"ตกลง อ่านข้อความ"</strong></li>
+        <li>ระบบเปรียบเทียบ HN อัตโนมัติ — ผ่าน ✅ → ระบบแสดงข้อมูลถุงเลือด</li>
+        <li>กด <strong>"ถ่ายรูปบัตรคล้องถุงเลือด"</strong> → ถ่ายบัตรที่คล้องถุงเลือด → ผ่าน → ไปขั้นตอนที่ 3</li>
       </ol>
+      <div class="alert alert-danger" style="margin-top:8px;">
+        <div class="alert-icon">❌</div>
+        <div><div class="alert-title">HN หรือรหัสถุงเลือดไม่ตรง</div><p>ระบบแสดงแถบแดง + เสียงเตือน — <strong>ห้ามให้เลือด</strong> กด <strong>"ตรวจสอบซ้ำ"</strong> เพื่อเริ่มใหม่จากขั้นตอนที่ 1</p></div>
+      </div>
     </div>
   </div>
 
   <!-- STEP 3 -->
-  <h3>5. ขั้นตอนที่ 3 — บันทึกสำเร็จ</h3>
+  <h3>5. ขั้นตอนที่ 3 — ยืนยัน 2 พยาบาล &amp; บันทึกสำเร็จ</h3>
   <div class="step-card no-break">
     <div class="step-body">
-      <p>ระบบแสดง <strong>✅ บันทึกสำเร็จ</strong> พร้อมเวลาเริ่มให้เลือดและสรุปข้อมูลทั้งหมด</p>
-      <table style="margin-top:10px;">
+      <ol>
+        <li><strong>พยาบาลคนที่ 1</strong> — แสดงชื่ออัตโนมัติจาก Login (ไม่ต้องกรอก)</li>
+        <li><strong>พยาบาลคนที่ 2</strong> — กรอกชื่อพยาบาลที่มายืนยันร่วม (ต้องเป็นคนละคน)</li>
+        <li>ติ๊ก Checklist ยืนยันความพร้อมให้ครบ 3 ข้อ:
+          <ul style="margin-top:6px;">
+            <li>☑ ใส่ป้ายข้อมือให้เลือดผู้ป่วยแล้ว</li>
+            <li>☑ แจ้งอาการผิดปกติที่ต้องเฝ้าระวัง (ผื่นคัน หายใจเหนื่อย) ให้เรียกพยาบาลแล้ว</li>
+            <li>☑ เตรียมวัดสัญญาณชีพเป็นระยะตลอดการให้เลือด (ตามแนวทาง) แล้ว</li>
+          </ul>
+        </li>
+        <li>กด <strong>"ยืนยันเริ่มให้เลือด — บันทึกเวลา"</strong> (ปุ่มกดได้หลังติ๊กครบ 3 ข้อเท่านั้น)</li>
+      </ol>
+      <p style="font-size:12px; margin-top:10px; margin-bottom:4px;">ระบบแสดง <strong>✅ บันทึกสำเร็จ</strong> พร้อมเวลาเริ่มให้เลือดและสรุปข้อมูล:</p>
+      <table style="margin-top:6px;">
         <tr><th>ปุ่ม</th><th>ทำอะไร</th></tr>
         <tr><td><strong>บันทึกภาพ / แชร์ไป LINE</strong></td><td>สร้างภาพสรุป → แชร์เข้า LINE กลุ่ม Ward</td></tr>
+        <tr><td><strong>ออกจากระบบ</strong></td><td>Sign out และกลับหน้า Login</td></tr>
         <tr><td><strong>ถุงเลือดถัดไป</strong></td><td>สแกนถุงเลือดใบใหม่ (ผู้ป่วยคนเดิม)</td></tr>
         <tr><td><strong>ผู้ป่วยรายต่อไป</strong></td><td>ล้างข้อมูลทั้งหมด เริ่มต้นใหม่</td></tr>
       </table>
