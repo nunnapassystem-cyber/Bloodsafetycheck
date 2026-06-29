@@ -33,6 +33,7 @@ export function usePatientSession(onTimeout?: () => void) {
   function setPatientBloodGroup(bg: string) { setPatientBloodGroupState(bg); resetTimer() }
   function setOrderedComponent(c: string) { setOrderedComponentState(c); resetTimer() }
   function nextStep() { setStep(s => (s < 3 ? (s + 1) as 1 | 2 | 3 : 3)); resetTimer() }
+  function goBackToStep1() { setStep(1); resetTimer() }
 
-  return { bloodBag, patientData, patientBloodGroup, orderedComponent, step, setBloodBag, setPatientData, setPatientBloodGroup, setOrderedComponent, nextStep, clearSession }
+  return { bloodBag, patientData, patientBloodGroup, orderedComponent, step, setBloodBag, setPatientData, setPatientBloodGroup, setOrderedComponent, nextStep, goBackToStep1, clearSession }
 }

@@ -90,7 +90,7 @@ export default function ScanPage() {
   }
 
   function handleStep2Reset() {
-    session.clearSession()
+    session.goBackToStep1()
     setStep2Fail(false)
     setStep2FailReason('')
     setWristbandVerified(false)
@@ -119,7 +119,7 @@ export default function ScanPage() {
                 onClick={handleStep2Reset}
                 className="w-full border border-gray-200 text-sm text-gray-600 py-2 rounded hover:border-gray-400 transition-colors"
               >
-                เริ่มต้นใหม่
+                ตรวจสอบซ้ำ — ย้อนกลับขั้นตอน 1
               </button>
             </div>
           )}
