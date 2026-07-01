@@ -29,6 +29,14 @@ export default function ScanPage() {
   const [step2Fail, setStep2Fail] = useState(false)
   const [step2FailReason, setStep2FailReason] = useState('')
   const [askedName, setAskedName] = useState(false)
+  const [bagVerifyIndex, setBagVerifyIndex] = useState(0)
+
+  // derived — multi-bag support
+  const allBagIds = session.bloodBag
+    ? [session.bloodBag.id, ...(session.bloodBag.extraBags?.map(b => b.id) ?? [])]
+    : []
+  const currentBagToVerify = allBagIds[bagVerifyIndex] ?? ''
+  const isMultiBag = allBagIds.length > 1
 
   useEffect(() => {
     createClient().auth.getUser().then(({ data: { user } }) => {
@@ -65,9 +73,9 @@ export default function ScanPage() {
 
   async function handleBagRescan(d: BloodBagOcr) {
     const scanned = (d.bagId ?? '').trim()
-    if (!scanned || scanned !== session.bloodBag!.id) {
+    if (!scanned || scanned !== currentBagToVerify) {
       playAlert()
-      const reason = `ถุงเลือดไม่ตรง: บันทึก ${session.bloodBag!.id} / Scan ได้ ${scanned}`
+      const reason = `ถุงเลือดไม่ตรง: รายการ ${currentBagToVerify} / Scan ได้ ${scanned}`
       setStep2Fail(true)
       setStep2FailReason(reason)
       await fetch('/api/logs', {
@@ -86,7 +94,12 @@ export default function ScanPage() {
         }),
       })
     } else {
-      session.nextStep()
+      const nextIndex = bagVerifyIndex + 1
+      if (nextIndex >= allBagIds.length) {
+        session.nextStep()
+      } else {
+        setBagVerifyIndex(nextIndex)
+      }
     }
   }
 
@@ -96,6 +109,7 @@ export default function ScanPage() {
     setStep2FailReason('')
     setWristbandVerified(false)
     setAskedName(false)
+    setBagVerifyIndex(0)
   }
 
   return (
@@ -152,6 +166,21 @@ export default function ScanPage() {
             <div className="space-y-3">
               <AlertBanner type="success" title="✅ ผู้ป่วยถูกคน" />
               {session.bloodBag && <BloodBagCard bag={session.bloodBag} />}
+              {isMultiBag && (
+                <div className="border border-primary rounded-lg px-3 py-2.5 bg-primary-light">
+                  <p className="text-xs font-medium text-primary">
+                    ตรวจสอบถุงที่ {bagVerifyIndex + 1} / {allBagIds.length}
+                  </p>
+                  <p className="font-mono text-sm text-primary mt-0.5">{currentBagToVerify}</p>
+                  <div className="flex gap-1 mt-2">
+                    {allBagIds.map((id, i) => (
+                      <div key={id} className={`h-1.5 flex-1 rounded-full transition-colors ${
+                        i < bagVerifyIndex ? 'bg-success' : i === bagVerifyIndex ? 'bg-primary' : 'bg-gray-300'
+                      }`} />
+                    ))}
+                  </div>
+                </div>
+              )}
               <OcrScanner mode="bloodbag" onResult={handleBagRescan} />
             </div>
           )}

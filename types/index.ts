@@ -18,6 +18,7 @@ export interface BloodBagData {
   component: 'PRC' | 'LPRC' | 'FFP' | 'PC' | 'LDPPC' | 'LPPC' | 'SDP' | 'CRYO' | 'LDPRC' | 'LPRC-N' | 'CRP'
   bloodGroup: string
   volumeMl: number
+  extraBags?: Array<{ id: string; volumeMl: number }>
 }
 
 export interface PatientData {

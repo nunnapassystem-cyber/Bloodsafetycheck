@@ -11,6 +11,7 @@ import type { BloodBagOcr } from '@/lib/ocr'
 const ABO_GROUPS = ['A', 'B', 'O', 'AB'] as const
 const RH_OPTIONS = ['Positive', 'Negative'] as const
 const COMPONENTS = ['LPRC', 'FFP', 'PC', 'PRC', 'LDPPC', 'LPPC', 'SDP', 'CRYO', 'LDPRC', 'LPRC-N', 'CRP'] as const
+const MULTI_BAG_COMPONENTS = new Set(['PC'])
 
 interface Props {
   session: ReturnType<typeof usePatientSession>
@@ -91,6 +92,8 @@ export function PatientStep({ session, nurse1Name }: Props) {
   const [showChecklist, setShowChecklist] = useState(false)
   const [checkBand, setCheckBand]         = useState(false)
   const [checkConsent, setCheckConsent]   = useState(false)
+  const [extraBags, setExtraBags]         = useState<Array<{ id: string; volumeMl: number }>>([])
+  const [addingExtraBag, setAddingExtraBag] = useState(false)
 
   // ── computed ──
   const hnMatch = wristbandOcr && bloodBagOcr
@@ -177,6 +180,7 @@ export function PatientStep({ session, nurse1Name }: Props) {
       component: bloodBagOcr.component as BloodBagData['component'],
       bloodGroup: bagBG,
       volumeMl: vol,
+      ...(extraBags.length > 0 ? { extraBags } : {}),
     }
     session.setPatientData({ wristbandId: whn, name: wname })
     session.setPatientBloodGroup(patientBG)
@@ -192,6 +196,7 @@ export function PatientStep({ session, nurse1Name }: Props) {
     setHnMismatch(false); setFormError(null)
     setBgFail(false); setBgFailReason('')
     setShowChecklist(false); setCheckBand(false); setCheckConsent(false)
+    setExtraBags([]); setAddingExtraBag(false)
   }
 
   return (
@@ -326,6 +331,69 @@ export function PatientStep({ session, nurse1Name }: Props) {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* ══ multi-bag PC ══ */}
+          {bloodBagOcr && MULTI_BAG_COMPONENTS.has(bloodBagOcr.component ?? '') && !showChecklist && (
+            <div className="border border-primary rounded-lg overflow-hidden">
+              <div className="bg-primary-light px-3 py-2 border-b border-primary">
+                <span className="text-xs font-medium text-primary">
+                  รายการถุง {bloodBagOcr.component} ทั้งหมด ({1 + extraBags.length} ถุง
+                  {' — '}รวม {(bloodBagOcr.volumeMl ?? 0) + extraBags.reduce((s, b) => s + b.volumeMl, 0)} mL)
+                </span>
+              </div>
+
+              {/* ถุงที่ 1 */}
+              <div className="px-3 py-2.5 flex items-center gap-2 border-b border-gray-100">
+                <span className="text-xs text-gray-400 w-12 flex-shrink-0">ถุง 1</span>
+                <span className="font-mono text-sm flex-1 text-gray-900">{bloodBagOcr.bagId ?? '—'}</span>
+                <span className="text-xs text-gray-400">{bloodBagOcr.volumeMl ?? 0} mL</span>
+              </div>
+
+              {/* ถุงเพิ่มเติม */}
+              {extraBags.map((bag, idx) => (
+                <div key={bag.id} className="px-3 py-2.5 flex items-center gap-2 border-b border-gray-100">
+                  <span className="text-xs text-gray-400 w-12 flex-shrink-0">ถุง {idx + 2}</span>
+                  <span className="font-mono text-sm flex-1 text-gray-900">{bag.id}</span>
+                  <span className="text-xs text-gray-400">{bag.volumeMl} mL</span>
+                  <button
+                    onClick={() => setExtraBags(prev => prev.filter((_, i) => i !== idx))}
+                    className="text-xs text-danger underline ml-1"
+                  >ลบ</button>
+                </div>
+              ))}
+
+              {/* เพิ่มถุง / scanner */}
+              <div className="px-3 py-2">
+                {!addingExtraBag ? (
+                  <button
+                    type="button"
+                    onClick={() => setAddingExtraBag(true)}
+                    className="w-full border border-dashed border-primary text-primary text-xs py-2.5 rounded hover:bg-primary-light transition-colors"
+                  >
+                    + เพิ่มถุงถัดไป (ถุงที่ {2 + extraBags.length})
+                  </button>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-xs text-gray-500">สแกนบัตรคล้องถุงที่ {2 + extraBags.length}</p>
+                    <OcrScanner
+                      mode="bloodbag"
+                      onResult={(d) => {
+                        if (d.bagId) {
+                          setExtraBags(prev => [...prev, { id: d.bagId!, volumeMl: d.volumeMl ?? 0 }])
+                        }
+                        setAddingExtraBag(false)
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setAddingExtraBag(false)}
+                      className="w-full text-xs text-gray-500 py-1 underline"
+                    >ยกเลิก</button>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

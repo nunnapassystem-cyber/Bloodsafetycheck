@@ -134,13 +134,15 @@ export function ConfirmStep({ session }: Props) {
 
     setSaving(true); setError(null)
     const startedAt = new Date().toISOString()
+    const allBagIds = [session.bloodBag.id, ...(session.bloodBag.extraBags?.map(b => b.id) ?? [])]
+    const totalVol  = session.bloodBag.volumeMl + (session.bloodBag.extraBags?.reduce((s, b) => s + b.volumeMl, 0) ?? 0)
 
     const res = await fetch('/api/logs', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         wristband_id: session.patientData.wristbandId,
-        blood_bag_id: session.bloodBag.id,
+        blood_bag_id: allBagIds.join(', '),
         blood_component: session.bloodBag.component,
         blood_group_bag: session.bloodBag.bloodGroup,
         match_result: 'PASS',
@@ -165,8 +167,8 @@ export function ConfirmStep({ session }: Props) {
       patientBloodGroup: session.patientBloodGroup,
       bagBloodGroup: session.bloodBag.bloodGroup,
       bagComponent: session.bloodBag.component,
-      bagId: session.bloodBag.id,
-      volumeMl: session.bloodBag.volumeMl,
+      bagId: allBagIds.join(', '),
+      volumeMl: totalVol,
       nurse1Name,
       nurse2Name: nurse2Name.trim(),
       wardName,
