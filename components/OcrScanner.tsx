@@ -1,7 +1,7 @@
 'use client'
 import { useRef, useState } from 'react'
-import { parseWristband, parseBloodBag } from '@/lib/ocr'
-import type { BloodBagOcr } from '@/lib/ocr'
+import { parseWristband, parseBloodBag, parseBloodSummary } from '@/lib/ocr'
+import type { BloodBagOcr, BloodSummaryOcr } from '@/lib/ocr'
 
 interface WristbandProps {
   mode: 'wristband'
@@ -13,11 +13,17 @@ interface BloodBagProps {
   onResult: (data: BloodBagOcr) => void
   label?: string
 }
-type Props = WristbandProps | BloodBagProps
+interface BloodSummaryProps {
+  mode: 'bloodsummary'
+  onResult: (data: BloodSummaryOcr) => void
+  label?: string
+}
+type Props = WristbandProps | BloodBagProps | BloodSummaryProps
 
 const LABEL = {
-  wristband: 'ถ่ายรูปสติ๊กเกอร์ชื่อผู้ป่วย',
-  bloodbag:  'ถ่ายรูปบัตรคล้องถุงเลือด',
+  wristband:    'ถ่ายรูปสติ๊กเกอร์ชื่อผู้ป่วย',
+  bloodbag:     'ถ่ายรูปบัตรคล้องถุงเลือด',
+  bloodsummary: 'ถ่ายรูปใบสรุปรายการถุงเลือด',
 }
 
 
@@ -65,6 +71,8 @@ export function OcrScanner(props: Props) {
     setError(null); setRawText(null); setShowManual(false)
     const d = props.mode === 'wristband'
       ? { top: 0.28, bottom: 0.78, left: 0.04, right: 0.96 }
+      : props.mode === 'bloodsummary'
+      ? { top: 0.05, bottom: 0.95, left: 0.02, right: 0.98 }
       : { top: 0.20, bottom: 0.80, left: 0.04, right: 0.96 }
     setCropTop(d.top); setCropBottom(d.bottom)
     setCropLeft(d.left); setCropRight(d.right)
@@ -118,6 +126,13 @@ export function OcrScanner(props: Props) {
           return
         }
         props.onResult(result.hn, result.name)
+      } else if (props.mode === 'bloodsummary') {
+        const result = parseBloodSummary(text)
+        if (!result.bags.length) {
+          setError('ไม่พบรายการถุงเลือด — กรุณาถ่ายใหม่')
+          return
+        }
+        props.onResult(result)
       } else {
         props.onResult(parseBloodBag(text))
       }

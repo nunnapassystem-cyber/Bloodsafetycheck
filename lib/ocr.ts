@@ -102,6 +102,56 @@ export function parseBloodBag(text: string): BloodBagOcr {
   }
 }
 
+export interface BloodSummaryOcr {
+  patientHN: string | null
+  patientName: string | null
+  component: string | null
+  bags: Array<{ id: string; abo: string | null; rh: string | null; volumeMl: number | null }>
+}
+
+export function parseBloodSummary(text: string): BloodSummaryOcr {
+  const hn =
+    text.match(/HN\s*[:：]\s*(\d{7})/i)?.[1] ??
+    text.match(/HN\s*[:：]\s*(\d{4,10})/i)?.[1] ??
+    null
+
+  const nameM = text.match(/(?:ชื่อ[^:：\n]{0,8}[:：]\s*)(.+)/)?.[1]?.trim() ?? null
+
+  let component: string | null = null
+  if      (/L\s*D\s*P\s*R\s*C/i.test(text))        component = 'LDPRC'
+  else if (/L\s*D\s*P\s*P\s*C/i.test(text))        component = 'LDPPC'
+  else if (/L\s*P\s*R\s*C[\s-]*N\b/i.test(text))   component = 'LPRC-N'
+  else if (/L\s*P\s*R\s*C/i.test(text))            component = 'LPRC'
+  else if (/L\s*P\s*P\s*C/i.test(text))            component = 'LPPC'
+  else if (/\bCRYO\b|Cryoprecipitate/i.test(text)) component = 'CRYO'
+  else if (/\bFFP\b/i.test(text))                   component = 'FFP'
+  else if (/\bSDP\b/i.test(text))                   component = 'SDP'
+  else if (/\bCRP\b/i.test(text))                   component = 'CRP'
+  else if (/\bPC\b/i.test(text))                    component = 'PC'
+  else if (/\bPRC\b/i.test(text))                   component = 'PRC'
+
+  const bagIdRe = /\b(\d{3}\.\d{2}\.\d\.[\d]+)\b/
+  const bags: BloodSummaryOcr['bags'] = []
+
+  for (const line of text.split('\n')) {
+    const idMatch = line.match(bagIdRe)
+    if (!idMatch) continue
+    const id = idMatch[1].replace(/\s+/g, '')
+
+    const aboRhM = line.match(/\b(AB|[ABO])\s*([+\-])/)
+    const abo = aboRhM?.[1]?.toUpperCase() ?? null
+    const rh  = aboRhM?.[2] === '+' ? 'Positive' : aboRhM?.[2] === '-' ? 'Negative' : null
+
+    const volM = line.match(/(\d{2,4})\s*ml/i)
+    const volumeMl = volM ? parseInt(volM[1]) : null
+
+    bags.push({ id, abo, rh, volumeMl })
+    if (bags.length >= 10) break
+  }
+
+  return { patientHN: hn, patientName: nameM, component, bags }
+}
+
 export async function ocrImage(
   file: File,
   onProgress?: (pct: number) => void,

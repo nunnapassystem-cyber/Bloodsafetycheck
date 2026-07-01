@@ -6,7 +6,7 @@ import { isBloodGroupMatch } from '@/lib/blood-logic'
 import { playAlert } from '@/lib/audio'
 import type { usePatientSession } from '@/hooks/usePatientSession'
 import type { BloodBagData } from '@/types'
-import type { BloodBagOcr } from '@/lib/ocr'
+import type { BloodBagOcr, BloodSummaryOcr } from '@/lib/ocr'
 
 const ABO_GROUPS = ['A', 'B', 'O', 'AB'] as const
 const RH_OPTIONS = ['Positive', 'Negative'] as const
@@ -94,6 +94,7 @@ export function PatientStep({ session, nurse1Name }: Props) {
   const [checkConsent, setCheckConsent]   = useState(false)
   const [extraBags, setExtraBags]         = useState<Array<{ id: string; volumeMl: number }>>([])
   const [addingExtraBag, setAddingExtraBag] = useState(false)
+  const [bloodBagScanMode, setBloodBagScanMode] = useState<'individual' | 'summary' | null>(null)
 
   // ── computed ──
   const hnMatch = wristbandOcr && bloodBagOcr
@@ -130,6 +131,28 @@ export function PatientStep({ session, nurse1Name }: Props) {
       return
     }
     setHnMismatch(false)
+  }
+
+  function handleSummaryOcrResult(d: BloodSummaryOcr) {
+    if (!d.bags.length) return
+    const first = d.bags[0]
+    const bag: BloodBagOcr = {
+      patientHN:   d.patientHN,
+      patientName: d.patientName,
+      component:   d.component,
+      abo:         first.abo,
+      rh:          first.rh,
+      bagId:       first.id,
+      volumeMl:    first.volumeMl,
+    }
+    setBloodBagOcr(bag)
+    if (bag.patientHN && wristbandOcr && bag.patientHN !== wristbandOcr.hn) {
+      playAlert()
+      setHnMismatch(true)
+    } else {
+      setHnMismatch(false)
+    }
+    setExtraBags(d.bags.slice(1).map(b => ({ id: b.id, volumeMl: b.volumeMl ?? 0 })))
   }
 
   async function handleConfirm() {
@@ -196,7 +219,7 @@ export function PatientStep({ session, nurse1Name }: Props) {
     setHnMismatch(false); setFormError(null)
     setBgFail(false); setBgFailReason('')
     setShowChecklist(false); setCheckBand(false); setCheckConsent(false)
-    setExtraBags([]); setAddingExtraBag(false)
+    setExtraBags([]); setAddingExtraBag(false); setBloodBagScanMode(null)
   }
 
   return (
@@ -290,7 +313,36 @@ export function PatientStep({ session, nurse1Name }: Props) {
             <div className="space-y-2">
               <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">ค. บัตรคล้องถุงเลือด</p>
               {!bloodBagOcr ? (
-                <OcrScanner mode="bloodbag" onResult={handleBagOcrResult} />
+                bloodBagScanMode === null ? (
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => setBloodBagScanMode('individual')}
+                      className="border border-primary text-primary text-xs font-medium py-3 rounded hover:bg-primary-light transition-colors"
+                    >
+                      📷 สแกนทีละถุง
+                      <span className="block text-xs font-normal opacity-70 mt-0.5">บัตรคล้องถุงเลือด</span>
+                    </button>
+                    <button
+                      onClick={() => setBloodBagScanMode('summary')}
+                      className="border border-primary text-primary text-xs font-medium py-3 rounded hover:bg-primary-light transition-colors"
+                    >
+                      📋 สแกนใบสรุป
+                      <span className="block text-xs font-normal opacity-70 mt-0.5">อ่านทุกถุงพร้อมกัน</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    <button
+                      onClick={() => setBloodBagScanMode(null)}
+                      className="text-xs text-gray-400 underline"
+                    >← เปลี่ยนวิธีสแกน</button>
+                    {bloodBagScanMode === 'individual' ? (
+                      <OcrScanner mode="bloodbag" onResult={handleBagOcrResult} />
+                    ) : (
+                      <OcrScanner mode="bloodsummary" onResult={handleSummaryOcrResult} />
+                    )}
+                  </div>
+                )
               ) : (
                 <div className="border border-blood rounded-lg overflow-hidden">
                   <div className="bg-danger-light px-3 py-2 border-b border-blood flex justify-between items-center">
