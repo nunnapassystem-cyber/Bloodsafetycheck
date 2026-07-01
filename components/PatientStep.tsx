@@ -400,7 +400,16 @@ export function PatientStep({ session, nurse1Name }: Props) {
               <div className="px-3 py-2.5 flex items-center gap-2 border-b border-gray-100">
                 <span className="text-xs text-gray-400 w-12 flex-shrink-0">ถุง 1</span>
                 <span className="font-mono text-sm flex-1 text-gray-900">{bloodBagOcr.bagId ?? '—'}</span>
-                <span className="text-xs text-gray-400">{bloodBagOcr.volumeMl ?? 0} mL</span>
+                <div className="flex items-center gap-0.5 flex-shrink-0">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={bloodBagOcr.volumeMl ?? ''}
+                    onChange={e => updateBloodBag({ volumeMl: parseInt(e.target.value) || null })}
+                    className="text-xs text-gray-600 w-14 text-right border-b border-dashed border-gray-300 bg-transparent focus:outline-none focus:border-primary font-mono"
+                  />
+                  <span className="text-xs text-gray-400">mL</span>
+                </div>
               </div>
 
               {/* ถุงเพิ่มเติม */}
@@ -408,7 +417,18 @@ export function PatientStep({ session, nurse1Name }: Props) {
                 <div key={bag.id} className="px-3 py-2.5 flex items-center gap-2 border-b border-gray-100">
                   <span className="text-xs text-gray-400 w-12 flex-shrink-0">ถุง {idx + 2}</span>
                   <span className="font-mono text-sm flex-1 text-gray-900">{bag.id}</span>
-                  <span className="text-xs text-gray-400">{bag.volumeMl} mL</span>
+                  <div className="flex items-center gap-0.5 flex-shrink-0">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={bag.volumeMl || ''}
+                      onChange={e => setExtraBags(prev =>
+                        prev.map((b, i) => i === idx ? { ...b, volumeMl: parseInt(e.target.value) || 0 } : b)
+                      )}
+                      className="text-xs text-gray-600 w-14 text-right border-b border-dashed border-gray-300 bg-transparent focus:outline-none focus:border-primary font-mono"
+                    />
+                    <span className="text-xs text-gray-400">mL</span>
+                  </div>
                   <button
                     onClick={() => setExtraBags(prev => prev.filter((_, i) => i !== idx))}
                     className="text-xs text-danger underline ml-1"
