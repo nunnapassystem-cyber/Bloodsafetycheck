@@ -60,11 +60,17 @@ export function parseBloodBag(text: string): BloodBagOcr {
   // ชนิดเลือด: LPRC, PRC, FFP, Platelet, WB
   // ใช้ L\s*P\s*R\s*C เพื่อรับทุกกรณีที่ OCR อาจใส่ space กลาง ("L PRC", "LP RC", "L P R C")
   let comp: string | null = null
-  if (/L\s*P\s*R\s*C/i.test(text))  comp = 'LPRC'
-  else if (/\bFFP\b/i.test(text))   comp = 'FFP'
-  else if (/\bPlatelet\b/i.test(text)) comp = 'Platelet'
-  else if (/\bWB\b/i.test(text))    comp = 'WB'
-  else if (/\bPRC\b/i.test(text))   comp = 'PRC'
+  if      (/L\s*D\s*P\s*R\s*C/i.test(text))          comp = 'LDPRC'
+  else if (/L\s*D\s*P\s*P\s*C/i.test(text))          comp = 'LDPPC'
+  else if (/L\s*P\s*R\s*C[\s-]*N\b/i.test(text))     comp = 'LPRC-N'
+  else if (/L\s*P\s*R\s*C/i.test(text))              comp = 'LPRC'
+  else if (/L\s*P\s*P\s*C/i.test(text))              comp = 'LPPC'
+  else if (/\bCRYO\b|Cryoprecipitate/i.test(text))   comp = 'CRYO'
+  else if (/\bFFP\b/i.test(text))                     comp = 'FFP'
+  else if (/\bSDP\b/i.test(text))                     comp = 'SDP'
+  else if (/\bCRP\b/i.test(text))                     comp = 'CRP'
+  else if (/\bPC\b/i.test(text))                      comp = 'PC'
+  else if (/\bPRC\b/i.test(text))                     comp = 'PRC'
 
   // Gr. : A  — blood group ถุงเลือด
   // Fallback 1: "Gr. : A" หรือ "Gr, : A" (OCR อาจอ่าน period เป็น comma)

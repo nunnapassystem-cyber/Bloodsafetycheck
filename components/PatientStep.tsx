@@ -10,7 +10,7 @@ import type { BloodBagOcr } from '@/lib/ocr'
 
 const ABO_GROUPS = ['A', 'B', 'O', 'AB'] as const
 const RH_OPTIONS = ['Positive', 'Negative'] as const
-const COMPONENTS = ['PRC', 'LPRC', 'FFP', 'Platelet', 'WB'] as const
+const COMPONENTS = ['LPRC', 'FFP', 'PC', 'PRC', 'LDPPC', 'LPPC', 'SDP', 'CRYO', 'LDPRC', 'LPRC-N', 'CRP'] as const
 
 interface Props {
   session: ReturnType<typeof usePatientSession>
