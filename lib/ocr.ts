@@ -132,17 +132,21 @@ export function parseBloodSummary(text: string): BloodSummaryOcr {
 
   const bagIdRe = /\b(\d{3}\.\d{2}\.\d\.[\d]+)\b/
   const bags: BloodSummaryOcr['bags'] = []
+  const lines = text.split('\n')
 
-  for (const line of text.split('\n')) {
-    const idMatch = line.match(bagIdRe)
+  for (let i = 0; i < lines.length; i++) {
+    const idMatch = lines[i].match(bagIdRe)
     if (!idMatch) continue
     const id = idMatch[1].replace(/\s+/g, '')
 
-    const aboRhM = line.match(/\b(AB|[ABO])\s*([+\-])/)
+    // รวม current + 2 บรรทัดถัดไป เผื่อ OCR แยกตารางออกเป็นคนละบรรทัด
+    const context = lines.slice(i, i + 3).join(' ')
+
+    const aboRhM = context.match(/\b(AB|[ABO])\s*([+\-])/)
     const abo = aboRhM?.[1]?.toUpperCase() ?? null
     const rh  = aboRhM?.[2] === '+' ? 'Positive' : aboRhM?.[2] === '-' ? 'Negative' : null
 
-    const volM = line.match(/(\d{2,4})\s*ml/i)
+    const volM = context.match(/(\d{2,4})\s*ml/i)
     const volumeMl = volM ? parseInt(volM[1]) : null
 
     bags.push({ id, abo, rh, volumeMl })

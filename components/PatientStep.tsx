@@ -348,7 +348,7 @@ export function PatientStep({ session, nurse1Name }: Props) {
                   <div className="bg-danger-light px-3 py-2 border-b border-blood flex justify-between items-center">
                     <span className="text-xs font-medium text-blood">ผลจากบัตรคล้องถุงเลือด</span>
                     <button
-                      onClick={() => { setBloodBagOcr(null); setHnMismatch(false) }}
+                      onClick={() => { setBloodBagOcr(null); setHnMismatch(false); setExtraBags([]) }}
                       className="text-xs text-blood underline"
                     >
                       ถ่ายรูปใหม่
